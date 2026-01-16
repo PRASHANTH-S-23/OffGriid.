@@ -16,7 +16,8 @@ const Footer = () => {
         <div className="grid md:grid-cols-12 gap-12 md:gap-8">
           {/* Logo & Location */}
           <div className="md:col-span-4">
-            <h3 className="text-2xl font-semibold mb-6">STUDIO</h3>
+            <h3 className="text-3xl font-bold tracking-tight font-jetbrains text-white">
+          Off Gr<span className="text-[#00CC55]">ii</span>d.</h3>
             <address className="not-italic text-background/70 text-sm leading-relaxed">
               123 Creative Avenue<br />
               Design District<br />
@@ -28,11 +29,11 @@ const Footer = () => {
           <div className="md:col-span-3">
             <h4 className="text-sm uppercase tracking-widest text-background/50 mb-4">Contact</h4>
             <div className="space-y-2 text-sm">
-              <a href="mailto:hello@studio.com" className="block text-background/70 hover:text-background transition-colors">
-                hello@studio.com
+              <a href="https://sanathr.vercel.app" className="block text-background/70 hover:text-background transition-colors">
+                Sanath R
               </a>
-              <a href="mailto:business@studio.com" className="block text-background/70 hover:text-background transition-colors">
-                business@studio.com
+              <a href="https://prashanth-s-23.vercel.app" className="block text-background/70 hover:text-background transition-colors">
+                Prashanth Kumar S
               </a>
             </div>
           </div>
@@ -90,8 +91,9 @@ const Footer = () => {
         {/* Bottom */}
         <div className="mt-16 pt-8 border-t border-background/10 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-background/50">
-            © 2024 Studio. All rights reserved.
+          © {new Date().getFullYear()} OffGriid. All rights reserved.
           </p>
+
           <Button
             variant="ghost"
             size="sm"

@@ -17,8 +17,8 @@ const Navigation = ({
     label: 'About Us',
     href: '#about'
   }, {
-    label: 'Projects',
-    href: '#projects'
+    label: 'Docs',
+    href: '#docs'
   }, {
     label: 'Contact',
     href: '#contact'
@@ -27,9 +27,13 @@ const Navigation = ({
       <header className="fixed top-0 left-0 right-0 z-50 px-6 py-4 md:px-12 md:py-6">
         <nav className="flex items-center justify-between">
           {/* Logo */}
-          <a href="#" className="text-xl font-semibold tracking-tight text-foreground">
-            ​OFFGRID
+          <a
+          href="#"
+          className="text-xl font-bold tracking-tight text-foreground font-jetbrains"
+          >
+          Off Gr<span className="text-[#00CC55]">ii</span>d.
           </a>
+
 
           {/* Right side buttons */}
           <div className="flex items-center gap-3">

@@ -2,6 +2,7 @@ import SplitText from './SplitText';
 import LiquidEther from './LiquidEther';
 import CurveDecoration from './CurveDecoration';
 import { Button } from '@/components/ui/button';
+import '@fontsource/jetbrains-mono';
 
 const Hero = () => {
   return (
@@ -9,7 +10,7 @@ const Hero = () => {
       {/* Liquid Ether Background */}
       <div className="absolute inset-0 z-0">
         <LiquidEther
-          colors={['#5227FF', '#FF9FFC', '#B19EEF']}
+          colors={['#00FF66', '#00CC55', '#0E1F17']}
           mouseForce={20}
           cursorSize={120}
           resolution={0.5}
@@ -26,7 +27,7 @@ const Hero = () => {
       <div className="relative z-20 container mx-auto px-6 md:px-12 text-center">
         <div className="max-w-5xl mx-auto">
           <SplitText
-            text="Beyond Visions Within Reach"
+            text="Beyond Networks. Beyond Control."
             tag="h1"
             className="text-5xl md:text-7xl lg:text-8xl font-light tracking-tight text-foreground leading-[1.1]"
             splitType="chars"
@@ -38,7 +39,7 @@ const Hero = () => {
           />
           
           <p className="mt-8 text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto opacity-0 animate-fade-in" style={{ animationDelay: '1.2s' }}>
-            We craft digital experiences that transcend imagination and bring bold ideas to life.
+            An offline-first, encrypted messaging network that works when the internet doesn’t.
           </p>
           
           <div className="mt-12 flex items-center justify-center gap-4 opacity-0 animate-fade-in" style={{ animationDelay: '1.5s' }}>
