@@ -10,6 +10,9 @@ interface ContactModalProps {
   onClose: () => void;
 }
 
+const RATE_LIMIT_HOURS = 24;
+const STORAGE_KEY = 'contact_last_sent_at';
+
 const ContactModal = ({ isOpen, onClose }: ContactModalProps) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -17,46 +20,59 @@ const ContactModal = ({ isOpen, onClose }: ContactModalProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const isRateLimited = () => {
+    const lastSent = localStorage.getItem(STORAGE_KEY);
+    if (!lastSent) return false;
+
+    const diffHours =
+      (Date.now() - Number(lastSent)) / (1000 * 60 * 60);
+
+    return diffHours < RATE_LIMIT_HOURS;
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!name.trim() || !email.trim() || !message.trim()) {
       toast({
-        title: "Please fill in all fields",
-        variant: "destructive"
+        title: 'Please fill in all fields',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (isRateLimited()) {
+      toast({
+        title: 'Rate limit reached',
+        description: 'You can send only one message per day.',
+        variant: 'destructive',
       });
       return;
     }
 
     setIsSubmitting(true);
 
-    try {
-      // TODO: Replace with actual edge function call once Cloud is enabled
-      // const response = await supabase.functions.invoke('send-contact-email', {
-      //   body: { name, email, message }
-      // });
-      
-      // Simulate API call for now
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast({
-        title: "Message sent!",
-        description: "We'll get back to you soon."
-      });
-      
-      setName('');
-      setEmail('');
-      setMessage('');
-      onClose();
-    } catch (error) {
-      toast({
-        title: "Failed to send message",
-        description: "Please try again later.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+    // Construct mailto
+    const subject = encodeURIComponent(`Contact from ${name}`);
+    const body = encodeURIComponent(
+      `Name: ${name}\nEmail: ${email}\n\n${message}`
+    );
+
+    window.location.href = `mailto:prashanthkumarsvpl@gmail.com?subject=${subject}&body=${body}`;
+
+    // Save timestamp
+    localStorage.setItem(STORAGE_KEY, Date.now().toString());
+
+    toast({
+      title: 'Message prepared',
+      description: 'Your email client has been opened.',
+    });
+
+    setIsSubmitting(false);
+    setName('');
+    setEmail('');
+    setMessage('');
+    onClose();
   };
 
   if (!isOpen) return null;
@@ -64,76 +80,71 @@ const ContactModal = ({ isOpen, onClose }: ContactModalProps) => {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center">
       {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-foreground/50 backdrop-blur-sm animate-fade-in"
+      <div
+        className="absolute inset-0 bg-foreground/50 backdrop-blur-sm"
         onClick={onClose}
       />
-      
+
       {/* Modal */}
-      <div className="relative w-full max-w-lg mx-4 bg-card rounded-2xl shadow-2xl animate-scale-in overflow-hidden">
+      <div className="relative w-full max-w-lg mx-4 bg-card rounded-2xl shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-border">
-          <h2 className="text-2xl font-light text-foreground">Let's Talk</h2>
-          <button 
+          <h2 className="text-2xl font-light text-foreground">
+            Let's Talk
+          </h2>
+          <button
             onClick={onClose}
             className="rounded-full p-2 hover:bg-muted transition-colors"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
-        
+
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           <div>
-            <label htmlFor="name" className="block text-sm text-muted-foreground mb-2">
+            <label className="block text-sm text-muted-foreground mb-2">
               Your Name
             </label>
             <Input
-              id="name"
-              type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="John Doe"
-              className="rounded-lg border-border"
+              className="rounded-lg"
               maxLength={100}
             />
           </div>
-          
+
           <div>
-            <label htmlFor="email" className="block text-sm text-muted-foreground mb-2">
+            <label className="block text-sm text-muted-foreground mb-2">
               Email Address
             </label>
             <Input
-              id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="john@example.com"
-              className="rounded-lg border-border"
+              className="rounded-lg"
               maxLength={255}
             />
           </div>
-          
+
           <div>
-            <label htmlFor="message" className="block text-sm text-muted-foreground mb-2">
+            <label className="block text-sm text-muted-foreground mb-2">
               Your Message
             </label>
             <Textarea
-              id="message"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="Tell us about your project..."
-              className="rounded-lg border-border min-h-[120px] resize-none"
+              className="rounded-lg min-h-[120px] resize-none"
               maxLength={1000}
             />
           </div>
-          
-          <Button 
+
+          <Button
             type="submit"
             disabled={isSubmitting}
             className="w-full rounded-full py-6 text-base"
           >
-            {isSubmitting ? 'Sending...' : 'Send Message'}
+            Open Email Client
           </Button>
         </form>
       </div>

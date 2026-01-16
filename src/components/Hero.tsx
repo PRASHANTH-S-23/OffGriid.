@@ -43,14 +43,21 @@ const Hero = () => {
           </p>
           
           <div className="mt-12 flex items-center justify-center gap-4 opacity-0 animate-fade-in" style={{ animationDelay: '1.5s' }}>
-            <Button 
-              variant="outline"
-              size="lg"
-              className="rounded-full px-8 py-6 text-base border-foreground/20 hover:bg-foreground hover:text-background transition-all duration-300 group"
-            >
-              <span className="mr-2 inline-block w-2 h-2 rounded-full bg-accent group-hover:bg-background transition-colors" />
-              About Us
-            </Button>
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={() => {
+              document.getElementById("about")?.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+              });
+            }}
+            className="rounded-full px-8 py-6 text-base border-foreground/20 hover:bg-foreground hover:text-background transition-all duration-300 group"
+          >
+            <span className="mr-2 inline-block w-2 h-2 rounded-full bg-accent group-hover:bg-background transition-colors" />
+            About Us
+          </Button>
+
           </div>
         </div>
       </div>

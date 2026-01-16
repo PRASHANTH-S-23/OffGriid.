@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowUp, Twitter, Instagram, Linkedin } from 'lucide-react';
+import { ArrowUp, Github, Linkedin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -11,6 +11,7 @@ const Footer = () => {
   };
 
   return (
+    <section id = 'footer'>
     <footer className="relative bg-foreground text-background py-16 md:py-24">
       <div className="container mx-auto px-6 md:px-12">
         <div className="grid md:grid-cols-12 gap-12 md:gap-8">
@@ -19,9 +20,8 @@ const Footer = () => {
             <h3 className="text-3xl font-bold tracking-tight font-jetbrains text-white">
           Off Gr<span className="text-[#00CC55]">ii</span>d.</h3>
             <address className="not-italic text-background/70 text-sm leading-relaxed">
-              123 Creative Avenue<br />
-              Design District<br />
-              New York, NY 10001
+              ZER0 BLINK<br />
+              Bengaluru, KA 
             </address>
           </div>
 
@@ -43,49 +43,50 @@ const Footer = () => {
             <h4 className="text-sm uppercase tracking-widest text-background/50 mb-4">Social</h4>
             <div className="flex gap-4">
               <a 
-                href="#" 
+                href="https://github.com/PRASHANTH-S-23/OffGriid." 
                 className="text-background/70 hover:text-background transition-colors"
-                aria-label="Twitter"
+                aria-label="Github"
               >
-                <Twitter className="h-5 w-5" />
+                <Github className="h-5 w-5" />
               </a>
               <a 
-                href="#" 
+                href="https://www.linkedin.com/in/prashanth-kumar-s23/" 
                 className="text-background/70 hover:text-background transition-colors"
                 aria-label="Instagram"
-              >
-                <Instagram className="h-5 w-5" />
-              </a>
-              <a 
-                href="#" 
-                className="text-background/70 hover:text-background transition-colors"
-                aria-label="LinkedIn"
               >
                 <Linkedin className="h-5 w-5" />
               </a>
             </div>
           </div>
 
-          {/* Newsletter */}
+          {/* Build Updates */}
           <div className="md:col-span-3">
-            <h4 className="text-sm uppercase tracking-widest text-background/50 mb-4">Newsletter</h4>
+            <h4 className="text-sm uppercase tracking-widest text-background/50 mb-4">
+              Build Updates
+            </h4>
+
             <div className="flex gap-2">
               <Input
                 type="email"
-                placeholder="Your email"
+                placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="flex-1 rounded-full border-background/20 bg-background/10 text-background placeholder:text-background/40 focus:border-background/40"
               />
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="icon"
                 className="rounded-full border-background/20 text-background hover:bg-background hover:text-foreground transition-all"
               >
                 →
               </Button>
             </div>
+
+            <p className="mt-2 text-xs text-background/40">
+              Stay Connected
+            </p>
           </div>
+
         </div>
 
         {/* Bottom */}
@@ -106,6 +107,7 @@ const Footer = () => {
         </div>
       </div>
     </footer>
+    </section>
   );
 };
 

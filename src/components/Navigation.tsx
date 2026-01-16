@@ -18,10 +18,11 @@ const Navigation = ({
     href: '#about'
   }, {
     label: 'Docs',
-    href: '#docs'
+    href: 'https://github.com/PRASHANTH-S-23/OffGriid./blob/main/README.md',
+    external: true,
   }, {
     label: 'Contact',
-    href: '#contact'
+    href: '#footer'
   }];
   return <>
       <header className="fixed top-0 left-0 right-0 z-50 px-6 py-4 md:px-12 md:py-6">
@@ -70,17 +71,34 @@ const Navigation = ({
                   {item.label}
                 </a>)}
             </nav>
+        {/* Visit Us */}
+        <div className="mt-auto">
+          <p className="text-sm text-muted-foreground mb-4">
+            Visit us 
+          </p>
 
-            {/* Newsletter */}
-            <div className="mt-auto">
-              <p className="text-sm text-muted-foreground mb-4">Subscribe to our newsletter</p>
-              <div className="flex gap-2">
-                <Input type="email" placeholder="Enter your email" value={email} onChange={e => setEmail(e.target.value)} className="flex-1 rounded-full border-border bg-transparent" />
-                <Button variant="default" className="rounded-full px-6">
-                  Subscribe
+          <div className="flex gap-2">
+            <div className="flex-1 rounded-full border border-border px-4 py-2 text-sm text-muted-foreground flex items-center">
+              ZERO BLINK
+            </div>
+
+                <Button
+                  asChild
+                  variant="default"
+                  className="rounded-full px-6"
+                >
+                  <a
+                    href="https://zeroblink.vercel.app/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Open
+                  </a>
                 </Button>
               </div>
             </div>
+
+
           </div>
         </div>
       </div>
