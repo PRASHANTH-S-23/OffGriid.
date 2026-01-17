@@ -71,7 +71,12 @@ const Hero = () => {
       {/* Hero Content with parallax */}
       <div ref={contentRef} className="relative z-20 container mx-auto px-6 md:px-12 text-center will-change-transform">
         <div className="max-w-5xl mx-auto">
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-light tracking-tight text-foreground leading-[1.1] text-justify-center">
+          <h1
+            className="
+              font-light tracking-tight text-foreground leading-[1.1] text-justify-center
+              text-[clamp(2.5rem,6vw,5rem)]
+            "
+          >
             <SplitText
               text="Beyond Networks."
               splitType="chars"
@@ -92,6 +97,7 @@ const Hero = () => {
               to={{ opacity: 1, y: 0, rotateX: 0 }}
             />
           </h1>
+
 
           
           <p className="mt-8 text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto opacity-0 animate-fade-in" style={{ animationDelay: '1.2s' }}>
