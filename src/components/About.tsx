@@ -186,7 +186,7 @@ const About = () => {
                 stepNumber={1}
                 title="Install APK"
                 description="Download and install the OffGriid APK directly — no app stores, no accounts."
-                downloadUrl="/apk/offgriid-1.0.0.apk"
+                downloadUrl="/OffGriid.apk"
                 fileName="offgriid-1.0.0.apk"
                 sha256="42ADF9BA6D0D3ED4A359936C9687C975EA4AB1ADD6C775F434D40A1981FC52AD"
               />

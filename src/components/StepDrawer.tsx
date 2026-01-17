@@ -119,11 +119,21 @@ export function StepDrawer({
               </div>
             </div>
 
-            <a href={downloadUrl} download={fileName}>
-              <Button className="w-full h-10 rounded-lg bg-accent hover:bg-accent/90">
+                          <a
+                href={downloadUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+
+              <Button
+              asChild
+              className="w-full h-10 rounded-lg bg-accent hover:bg-accent/90"
+            >
+              <a href={downloadUrl} download={fileName}>
                 <Download className="mr-2 h-4 w-4" />
                 Download APK
-              </Button>
+              </a>
+            </Button>
             </a>
 
             <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1.5">
