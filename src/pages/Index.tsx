@@ -1,48 +1,75 @@
-import { useState, lazy, Suspense } from 'react';
-import Navigation from '@/components/Navigation';
-import LiquidEther from '@/components/LiquidEther';
+import { useEffect, useState, lazy, Suspense } from "react";
+import Navigation from "@/components/Navigation";
 
-// Lazy load heavy components
-const Hero = lazy(() => import('@/components/Hero'));
-const About = lazy(() => import('@/components/About'));
-const Footer = lazy(() => import('@/components/Footer'));
-const ContactModal = lazy(() => import('@/components/ContactModal'));
+// Lazy-loaded components
+const Hero = lazy(() => import("@/components/Hero"));
+const About = lazy(() => import("@/components/About"));
+const Footer = lazy(() => import("@/components/Footer"));
+const ContactModal = lazy(() => import("@/components/ContactModal"));
+const LiquidEther = lazy(() => import("@/components/LiquidEther"));
 
-const LoadingFallback = () => (
-  <div className="min-h-screen flex items-center justify-center">
-    <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-  </div>
-);
-
-const Index = () => {
+const Index = ({ stage }: { stage: number }) => {
   const [isContactOpen, setIsContactOpen] = useState(false);
+  const [showLiquid, setShowLiquid] = useState(false);
+
+  // Delay LiquidEther until page is fully interactive
+  useEffect(() => {
+    if (stage >= 2) {
+      // Wait an extra moment after stage 2
+      const timer = setTimeout(() => setShowLiquid(true), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [stage]);
 
   return (
-    <main className="min-h-screen bg-background">
-      {/* Shared Liquid Ether Background - extends from Hero through About */}
-      <div className="fixed inset-0 z-0 h-[200vh]">
-        <LiquidEther
-          colors={['#00FF66', '#00CC55', '#0E1F17']}
-          mouseForce={20}
-          cursorSize={120}
-          resolution={0.4}
-          autoDemo={true}
-          autoSpeed={0.4}
-          autoIntensity={2.5}
-        />
-      </div>
-
-      <Navigation onContactClick={() => setIsContactOpen(true)} />
-      
-      <Suspense fallback={<LoadingFallback />}>
+    <main className="min-h-screen bg-background relative overflow-hidden">
+      {/* STAGE 0: Hero ONLY */}
+      <Suspense fallback={null}>
         <Hero />
-        <About />
-        <Footer />
-        <ContactModal 
-          isOpen={isContactOpen} 
-          onClose={() => setIsContactOpen(false)} 
-        />
       </Suspense>
+
+      {/* STAGE 1: Navigation (after first paint) */}
+      {stage >= 1 && (
+        <Navigation onContactClick={() => setIsContactOpen(true)} />
+      )}
+
+      {/* STAGE 2+: Background effect (DELAYED - most expensive) */}
+      {showLiquid && (
+        <Suspense fallback={null}>
+          <div 
+            className="fixed inset-0 z-0 h-[200vh] pointer-events-none"
+            style={{ willChange: 'transform' }} // GPU acceleration hint
+          >
+            <LiquidEther
+              colors={["#00FF66", "#00CC55", "#0E1F17"]}
+              mouseForce={12} 
+              cursorSize={100} 
+              resolution={0.25} 
+              autoDemo={true}
+              autoSpeed={0.25} 
+              autoIntensity={1.5} 
+            />
+          </div>
+        </Suspense>
+      )}
+
+      {/* STAGE 2: Below-the-fold content */}
+      {stage >= 2 && (
+        <Suspense fallback={null}>
+          <About />
+          <Footer />
+        </Suspense>
+      )}
+
+      {/* STAGE 2: Modals only when needed */}
+      {stage >= 2 && isContactOpen && (
+        <Suspense fallback={null}>
+          <ContactModal
+            isOpen={isContactOpen}
+            onClose={() => setIsContactOpen(false)}
+          />
+        </Suspense>
+      )}
     </main>
   );
 };

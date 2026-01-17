@@ -26,6 +26,12 @@
     transform: rotate(360deg);
   }
 }
+@keyframes ether-fade {
+  to {
+    opacity: 1;
+  }
+}
+
 
 @media (prefers-reduced-motion: no-preference) {
   a:nth-of-type(2) .logo {

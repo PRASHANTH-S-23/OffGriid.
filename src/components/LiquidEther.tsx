@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 
+
 interface LiquidEtherProps {
   mouseForce?: number;
   cursorSize?: number;
@@ -51,6 +52,9 @@ export default function LiquidEther({
   const intersectionObserverRef = useRef<IntersectionObserver | null>(null);
   const isVisibleRef = useRef(true);
   const resizeRafRef = useRef<number | null>(null);
+  
+  const lastMouseUpdateRef = useRef(0);
+  const MOUSE_THROTTLE = 16; // ~60fps
 
   useEffect(() => {
     if (!mountRef.current) return;
@@ -105,9 +109,18 @@ export default function LiquidEther({
 
       init(container: HTMLElement) {
         this.container = container;
-        this.pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+        // CHANGED: Cap pixel ratio to 1.5
+        this.pixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
         this.resize();
-        this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        // CHANGED: Optimize renderer settings
+        this.renderer = new THREE.WebGLRenderer({ 
+          antialias: false, // Was true
+          alpha: true,
+          powerPreference: 'high-performance',
+          stencil: false,
+          depth: false
+        });
+        this.renderer.autoClear = false;
         this.renderer.autoClear = false;
         this.renderer.setClearColor(new THREE.Color(0x000000), 0);
         this.renderer.setPixelRatio(this.pixelRatio);
@@ -169,10 +182,11 @@ export default function LiquidEther({
         const defaultView = (this.docTarget && this.docTarget.defaultView) || (typeof window !== 'undefined' ? window : null);
         if (!defaultView) return;
         this.listenerTarget = defaultView;
-        this.listenerTarget.addEventListener('mousemove', this._onMouseMove);
+        // CHANGED: Add { passive: true } to all listeners
+        this.listenerTarget.addEventListener('mousemove', this._onMouseMove, { passive: true });
         this.listenerTarget.addEventListener('touchstart', this._onTouchStart, { passive: true });
         this.listenerTarget.addEventListener('touchmove', this._onTouchMove, { passive: true });
-        this.listenerTarget.addEventListener('touchend', this._onTouchEnd);
+        this.listenerTarget.addEventListener('touchend', this._onTouchEnd, { passive: true });
         if (this.docTarget) {
           this.docTarget.addEventListener('mouseleave', this._onDocumentLeave);
         }
@@ -204,8 +218,14 @@ export default function LiquidEther({
         this.isHoverInside = this.isPointInside(clientX, clientY);
         return this.isHoverInside;
       }
+      
+        setCoords(x: number, y: number) {
+        // ADD THROTTLING:
+        const now = performance.now();
+        if (now - lastMouseUpdateRef.current < MOUSE_THROTTLE) return;
+        lastMouseUpdateRef.current = now;
 
-      setCoords(x: number, y: number) {
+        // Original code continues:
         if (!this.container) return;
         if (this.timer) window.clearTimeout(this.timer);
         const rect = this.container.getBoundingClientRect();
@@ -218,7 +238,6 @@ export default function LiquidEther({
           this.mouseMoved = false;
         }, 100);
       }
-
       setNormalized(nx: number, ny: number) {
         this.coords.set(nx, ny);
         this.mouseMoved = true;
