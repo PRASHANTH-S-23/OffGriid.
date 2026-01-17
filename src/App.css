@@ -32,6 +32,12 @@
     animation: logo-spin infinite 20s linear;
   }
 }
+@media (prefers-reduced-motion: reduce) {
+  .will-change-transform {
+    transform: none !important;
+    animation: none !important;
+  }
+}
 
 .card {
   padding: 2em;

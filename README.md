@@ -89,7 +89,6 @@ Devices constantly advertise their presence (via BLE Advertising) and scan for o
 
 ![Sequence Diagram](/public/sequence.png)
 
-
 ### 2. Mesh Relay (Packet Routing)
 If Alice wants to send a message to Charlie, but Charlie is out of range:
 `Alice -> Bob -> Charlie`

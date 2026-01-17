@@ -1,10 +1,5 @@
-import { useRef } from "react";
-import { useGSAP } from "@gsap/react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useEffect, useRef } from "react";
 import { StepDrawer, InfoStep } from "./StepDrawer";
-
-gsap.registerPlugin(ScrollTrigger);
 
 const About = () => {
   const sectionRef = useRef<HTMLElement>(null);
@@ -13,89 +8,112 @@ const About = () => {
   const statsRef = useRef<HTMLDivElement>(null);
   const stepsRef = useRef<HTMLDivElement>(null);
 
-  useGSAP(
-    () => {
+  useEffect(() => {
+    let ctx: any;
+    let alive = true;
+
+    const initAnimations = async () => {
       if (!sectionRef.current) return;
 
-      // Text reveal
-      gsap.fromTo(
-        textRef.current,
-        { opacity: 0, y: 80 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 1.2,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: textRef.current,
-            start: "top 85%",
-            end: "top 50%",
-            scrub: 0.5,
-          },
+      const gsapModule = await import("gsap");
+      const scrollTriggerModule = await import("gsap/ScrollTrigger");
+
+      if (!alive) return;
+
+      const gsap = gsapModule.gsap || gsapModule.default;
+      const ScrollTrigger = scrollTriggerModule.ScrollTrigger;
+
+      gsap.registerPlugin(ScrollTrigger);
+
+      ctx = gsap.context(() => {
+        // Text reveal
+        if (textRef.current) {
+          gsap.fromTo(
+            textRef.current,
+            { opacity: 0, y: 80 },
+            {
+              opacity: 1,
+              y: 0,
+              duration: 1.2,
+              ease: "power3.out",
+              scrollTrigger: {
+                trigger: textRef.current,
+                start: "top 85%",
+                end: "top 50%",
+                scrub: 0.5,
+              },
+            }
+          );
         }
-      );
 
-      // Image parallax
-      gsap.fromTo(
-        imageRef.current,
-        { y: 100, scale: 0.95 },
-        {
-          y: -50,
-          scale: 1,
-          ease: "none",
-          scrollTrigger: {
-            trigger: imageRef.current,
-            start: "top bottom",
-            end: "bottom top",
-            scrub: 0.8,
-          },
+        // Image parallax
+        if (imageRef.current) {
+          gsap.fromTo(
+            imageRef.current,
+            { y: 100, scale: 0.95 },
+            {
+              y: -50,
+              scale: 1,
+              ease: "none",
+              scrollTrigger: {
+                trigger: imageRef.current,
+                start: "top bottom",
+                end: "bottom top",
+                scrub: 0.8,
+              },
+            }
+          );
         }
-      );
 
-      // Stats stagger
-      const statItems = statsRef.current?.children;
-      if (statItems) {
-        gsap.fromTo(
-          statItems,
-          { opacity: 0, y: 40 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.8,
-            stagger: 0.2,
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: statsRef.current,
-              start: "top 80%",
-              once: true,
-            },
-          }
-        );
-      }
+        // Stats stagger
+        if (statsRef.current) {
+          gsap.fromTo(
+            statsRef.current.children,
+            { opacity: 0, y: 40 },
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.8,
+              stagger: 0.2,
+              ease: "power2.out",
+              scrollTrigger: {
+                trigger: statsRef.current,
+                start: "top 80%",
+                once: true,
+              },
+            }
+          );
+        }
 
-      // Steps stagger
-      const stepItems = stepsRef.current?.children;
-      if (stepItems) {
-        gsap.fromTo(
-          stepItems,
-          { opacity: 0, y: 60 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.8,
-            stagger: 0.15,
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: stepsRef.current,
-              start: "top 75%",
-              once: true,
-            },
-          }
-        );
-      }
-    },
-    { scope: sectionRef }
-  );
+        // Steps stagger
+        if (stepsRef.current) {
+          gsap.fromTo(
+            stepsRef.current.children,
+            { opacity: 0, y: 60 },
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.8,
+              stagger: 0.15,
+              ease: "power2.out",
+              scrollTrigger: {
+                trigger: stepsRef.current,
+                start: "top 75%",
+                once: true,
+              },
+            }
+          );
+        }
+      }, sectionRef);
+    };
+
+    requestIdleCallback(initAnimations);
+
+    return () => {
+      alive = false;
+      ctx?.revert();
+    };
+  }, []);
 
   return (
     <section
@@ -119,7 +137,7 @@ const About = () => {
 
             <div
               ref={imageRef}
-              className="relative w-full aspect-[4/5] rounded-2xl overflow-hidden border border-border will-change-transform"
+              className="relative w-full aspect-[4/5] rounded-2xl overflow-hidden border border-border"
             >
               <img
                 src="/mesh.webp"
@@ -134,7 +152,7 @@ const About = () => {
           <div>
             <p
               ref={textRef}
-              className="text-2xl md:text-3xl lg:text-4xl font-light leading-relaxed text-foreground text-justify will-change-transform"
+              className="text-2xl md:text-3xl lg:text-4xl font-light leading-relaxed text-foreground text-justify"
             >
               OffGriid is an offline-first, peer-to-peer messaging network built
               for moments when traditional communication infrastructure fails.
@@ -176,11 +194,7 @@ const About = () => {
             How It Works
           </h3>
 
-          <div
-            ref={stepsRef}
-            className="grid md:grid-cols-3 gap-12 text-center"
-          >
-            {/* Step 01 */}
+          <div ref={stepsRef} className="grid md:grid-cols-3 gap-12 text-center">
             <div className="flex flex-col items-center">
               <StepDrawer
                 stepNumber={1}
@@ -192,7 +206,6 @@ const About = () => {
               />
             </div>
 
-            {/* Step 02 */}
             <div className="flex flex-col items-center">
               <InfoStep
                 stepNumber={2}
@@ -207,7 +220,6 @@ const About = () => {
               />
             </div>
 
-            {/* Step 03 */}
             <div className="flex flex-col items-center">
               <InfoStep
                 stepNumber={3}
