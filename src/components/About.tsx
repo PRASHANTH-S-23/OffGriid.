@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { StepDrawer, InfoStep } from "./StepDrawer";
 
 const About = () => {
@@ -8,111 +8,35 @@ const About = () => {
   const statsRef = useRef<HTMLDivElement>(null);
   const stepsRef = useRef<HTMLDivElement>(null);
 
+  const [textVisible, setTextVisible] = useState(false);
+  const [imageVisible, setImageVisible] = useState(false);
+  const [statsVisible, setStatsVisible] = useState(false);
+  const [stepsVisible, setStepsVisible] = useState(false);
+
   useEffect(() => {
-    let ctx: any;
-    let alive = true;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            if (entry.target === textRef.current) setTextVisible(true);
+            if (entry.target === imageRef.current) setImageVisible(true);
+            if (entry.target === statsRef.current) setStatsVisible(true);
+            if (entry.target === stepsRef.current) setStepsVisible(true);
+          }
+        });
+      },
+      {
+        threshold: 0.15,
+        rootMargin: "0px 0px -100px 0px",
+      }
+    );
 
-    const initAnimations = async () => {
-      if (!sectionRef.current) return;
+    if (textRef.current) observer.observe(textRef.current);
+    if (imageRef.current) observer.observe(imageRef.current);
+    if (statsRef.current) observer.observe(statsRef.current);
+    if (stepsRef.current) observer.observe(stepsRef.current);
 
-      const gsapModule = await import("gsap");
-      const scrollTriggerModule = await import("gsap/ScrollTrigger");
-
-      if (!alive) return;
-
-      const gsap = gsapModule.gsap || gsapModule.default;
-      const ScrollTrigger = scrollTriggerModule.ScrollTrigger;
-
-      gsap.registerPlugin(ScrollTrigger);
-
-      ctx = gsap.context(() => {
-        // Text reveal
-        if (textRef.current) {
-          gsap.fromTo(
-            textRef.current,
-            { opacity: 0, y: 80 },
-            {
-              opacity: 1,
-              y: 0,
-              duration: 1.2,
-              ease: "power3.out",
-              scrollTrigger: {
-                trigger: textRef.current,
-                start: "top 85%",
-                end: "top 50%",
-                scrub: 0.5,
-              },
-            }
-          );
-        }
-
-        // Image parallax
-        if (imageRef.current) {
-          gsap.fromTo(
-            imageRef.current,
-            { y: 100, scale: 0.95 },
-            {
-              y: -50,
-              scale: 1,
-              ease: "none",
-              scrollTrigger: {
-                trigger: imageRef.current,
-                start: "top bottom",
-                end: "bottom top",
-                scrub: 0.8,
-              },
-            }
-          );
-        }
-
-        // Stats stagger
-        if (statsRef.current) {
-          gsap.fromTo(
-            statsRef.current.children,
-            { opacity: 0, y: 40 },
-            {
-              opacity: 1,
-              y: 0,
-              duration: 0.8,
-              stagger: 0.2,
-              ease: "power2.out",
-              scrollTrigger: {
-                trigger: statsRef.current,
-                start: "top 80%",
-                once: true,
-              },
-            }
-          );
-        }
-
-        // Steps stagger
-        if (stepsRef.current) {
-          gsap.fromTo(
-            stepsRef.current.children,
-            { opacity: 0, y: 60 },
-            {
-              opacity: 1,
-              y: 0,
-              duration: 0.8,
-              stagger: 0.15,
-              ease: "power2.out",
-              scrollTrigger: {
-                trigger: stepsRef.current,
-                start: "top 75%",
-                once: true,
-              },
-            }
-          );
-        }
-      }, sectionRef);
-    };
-
-    requestIdleCallback(initAnimations);
-
-    return () => {
-      alive = false;
-      ctx?.revert();
-    };
+    return () => observer.disconnect();
   }, []);
 
   return (
@@ -137,7 +61,14 @@ const About = () => {
 
             <div
               ref={imageRef}
-              className="relative w-full aspect-[4/5] rounded-2xl overflow-hidden border border-border"
+              className={`
+                relative w-full aspect-[4/5] rounded-2xl overflow-hidden border border-border
+                transition-all duration-1000 ease-out
+                ${imageVisible 
+                  ? 'opacity-100 translate-y-0 scale-100' 
+                  : 'opacity-0 translate-y-12 scale-95'
+                }
+              `}
             >
               <img
                 src="/mesh.webp"
@@ -152,7 +83,14 @@ const About = () => {
           <div>
             <p
               ref={textRef}
-              className="text-2xl md:text-3xl lg:text-4xl font-light leading-relaxed text-foreground text-justify"
+              className={`
+                text-2xl md:text-3xl lg:text-4xl font-light leading-relaxed text-foreground text-justify
+                transition-all duration-1000 ease-out
+                ${textVisible 
+                  ? 'opacity-100 translate-y-0' 
+                  : 'opacity-0 translate-y-12'
+                }
+              `}
             >
               OffGriid is an offline-first, peer-to-peer messaging network built
               for moments when traditional communication infrastructure fails.
@@ -167,8 +105,20 @@ const About = () => {
               most.
             </p>
 
-            <div ref={statsRef} className="mt-12 grid grid-cols-2 gap-8">
-              <div>
+            <div 
+              ref={statsRef} 
+              className="mt-12 grid grid-cols-2 gap-8"
+            >
+              <div
+                className={`
+                  transition-all duration-700 ease-out
+                  ${statsVisible 
+                    ? 'opacity-100 translate-y-0' 
+                    : 'opacity-0 translate-y-8'
+                  }
+                `}
+                style={{ transitionDelay: statsVisible ? '0ms' : '0ms' }}
+              >
                 <span className="text-4xl md:text-5xl font-light text-foreground">
                   Offline
                 </span>
@@ -176,7 +126,16 @@ const About = () => {
                   First Architecture
                 </p>
               </div>
-              <div>
+              <div
+                className={`
+                  transition-all duration-700 ease-out
+                  ${statsVisible 
+                    ? 'opacity-100 translate-y-0' 
+                    : 'opacity-0 translate-y-8'
+                  }
+                `}
+                style={{ transitionDelay: statsVisible ? '200ms' : '0ms' }}
+              >
                 <span className="text-4xl md:text-5xl font-light text-foreground">
                   Zero
                 </span>
@@ -195,7 +154,17 @@ const About = () => {
           </h3>
 
           <div ref={stepsRef} className="grid md:grid-cols-3 gap-12 text-center">
-            <div className="flex flex-col items-center">
+            <div 
+              className={`
+                flex flex-col items-center
+                transition-all duration-700 ease-out
+                ${stepsVisible 
+                  ? 'opacity-100 translate-y-0' 
+                  : 'opacity-0 translate-y-12'
+                }
+              `}
+              style={{ transitionDelay: stepsVisible ? '0ms' : '0ms' }}
+            >
               <StepDrawer
                 stepNumber={1}
                 title="Install APK"
@@ -206,7 +175,17 @@ const About = () => {
               />
             </div>
 
-            <div className="flex flex-col items-center">
+            <div 
+              className={`
+                flex flex-col items-center
+                transition-all duration-700 ease-out
+                ${stepsVisible 
+                  ? 'opacity-100 translate-y-0' 
+                  : 'opacity-0 translate-y-12'
+                }
+              `}
+              style={{ transitionDelay: stepsVisible ? '150ms' : '0ms' }}
+            >
               <InfoStep
                 stepNumber={2}
                 title="Generate Identity"
@@ -220,7 +199,17 @@ const About = () => {
               />
             </div>
 
-            <div className="flex flex-col items-center">
+            <div 
+              className={`
+                flex flex-col items-center
+                transition-all duration-700 ease-out
+                ${stepsVisible 
+                  ? 'opacity-100 translate-y-0' 
+                  : 'opacity-0 translate-y-12'
+                }
+              `}
+              style={{ transitionDelay: stepsVisible ? '300ms' : '0ms' }}
+            >
               <InfoStep
                 stepNumber={3}
                 title="Auto-Mesh"

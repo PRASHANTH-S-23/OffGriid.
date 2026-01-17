@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import SplitText from "./SplitText";
 import CurveDecoration from "./CurveDecoration";
 import { Button } from "@/components/ui/button";
@@ -9,80 +9,50 @@ const Hero = () => {
   const contentRef = useRef<HTMLDivElement>(null);
   const curveRef = useRef<HTMLDivElement>(null);
   const scrollIndicatorRef = useRef<HTMLDivElement>(null);
+  const [scrollProgress, setScrollProgress] = useState(0);
 
   useEffect(() => {
-    let ctx: any;
-    let alive = true;
+    let ticking = false;
 
-    const initAnimations = async () => {
-      if (!sectionRef.current) return;
-
-      const gsapModule = await import("gsap");
-      const scrollTriggerModule = await import("gsap/ScrollTrigger");
-
-      if (!alive) return;
-
-      const gsap = gsapModule.gsap || gsapModule.default;
-      const ScrollTrigger = scrollTriggerModule.ScrollTrigger;
-
-      gsap.registerPlugin(ScrollTrigger);
-
-      ctx = gsap.context(() => {
-        // Hero content parallax
-        if (contentRef.current) {
-          gsap.to(contentRef.current, {
-            y: -150,
-            opacity: 0,
-            ease: "none",
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: "top top",
-              end: "bottom top",
-              scrub: 0.5,
-            },
-          });
-        }
-
-        // Curve decoration parallax
-        if (curveRef.current) {
-          gsap.to(curveRef.current, {
-            y: -80,
-            scale: 1.1,
-            ease: "none",
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: "center center",
-              end: "bottom top",
-              scrub: 0.3,
-            },
-          });
-        }
-
-        // Scroll indicator fade
-        if (scrollIndicatorRef.current) {
-          gsap.to(scrollIndicatorRef.current, {
-            opacity: 0,
-            y: -30,
-            ease: "none",
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: "top top",
-              end: "20% top",
-              scrub: true,
-            },
-          });
-        }
-      }, sectionRef);
+    const handleScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          if (!sectionRef.current) return;
+          
+          const rect = sectionRef.current.getBoundingClientRect();
+          const viewportHeight = window.innerHeight;
+          
+          // Calculate scroll progress (0 to 1)
+          const progress = Math.max(0, Math.min(1, 1 - (rect.bottom / viewportHeight)));
+          setScrollProgress(progress);
+          
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
 
-    // IMPORTANT: wait until browser is idle (after LCP)
-    requestIdleCallback(initAnimations);
+    // Use passive listener for better scroll performance
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll(); // Initial call
 
-    return () => {
-      alive = false;
-      ctx?.revert();
-    };
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Calculate transform values based on scroll
+  const contentTransform = {
+    transform: `translateY(${scrollProgress * -150}px)`,
+    opacity: 1 - scrollProgress * 1.5,
+  };
+
+  const curveTransform = {
+    transform: `translateY(${scrollProgress * -80}px) scale(${1 + scrollProgress * 0.1})`,
+  };
+
+  const indicatorTransform = {
+    transform: `translateY(${scrollProgress * -30}px)`,
+    opacity: Math.max(0, 1 - scrollProgress * 5),
+  };
 
   return (
     <section
@@ -92,7 +62,8 @@ const Hero = () => {
       {/* Curve decoration */}
       <div
         ref={curveRef}
-        className="absolute bottom-0 left-0 right-0 z-10 translate-y-1/2"
+        className="absolute bottom-0 left-0 right-0 z-10 translate-y-1/2 will-change-transform"
+        style={curveTransform}
       >
         <CurveDecoration />
       </div>
@@ -103,7 +74,8 @@ const Hero = () => {
       {/* Hero content */}
       <div
         ref={contentRef}
-        className="relative z-20 container mx-auto px-6 md:px-12 text-center"
+        className="relative z-20 container mx-auto px-6 md:px-12 text-center will-change-transform"
+        style={contentTransform}
       >
         <div className="max-w-5xl mx-auto">
           <h1
@@ -166,8 +138,8 @@ const Hero = () => {
       {/* Scroll indicator */}
       <div
         ref={scrollIndicatorRef}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 opacity-0 animate-fade-in"
-        style={{ animationDelay: "2s" }}
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 opacity-0 animate-fade-in will-change-transform"
+        style={{ ...indicatorTransform, animationDelay: "2s" }}
       >
         <div className="flex flex-col items-center gap-2 text-muted-foreground">
           <span className="text-sm">Scroll</span>
