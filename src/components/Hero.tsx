@@ -65,8 +65,8 @@ const Hero = () => {
         <CurveDecoration />
       </div>
       
-      {/* Bottom gradient fade for smooth transition */}
-      <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-background/80 via-background/40 to-transparent z-[5] pointer-events-none" />
+      {/* Subtle bottom fade - minimal to avoid visible border */}
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background/20 to-transparent z-[5] pointer-events-none" />
 
       {/* Hero Content with parallax */}
       <div ref={contentRef} className="relative z-20 container mx-auto px-6 md:px-12 text-center will-change-transform">
