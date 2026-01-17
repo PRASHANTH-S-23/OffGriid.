@@ -109,15 +109,10 @@ const About = () => {
     <section
       ref={sectionRef}
       id="about"
-      className="relative py-32 md:py-48 bg-transparent overflow-hidden"
+      className="relative pt-16 md:pt-24 pb-32 md:pb-48 bg-transparent overflow-hidden"
     >
-      {/* Smooth gradient transition from hero */}
-      <div className="absolute inset-0 z-0">
-        {/* Top gradient blending from transparent to solid */}
-        <div className="absolute top-0 left-0 right-0 h-64 bg-gradient-to-b from-transparent via-background/60 to-background/90" />
-        {/* Main background */}
-        <div className="absolute top-64 inset-x-0 bottom-0 bg-background/90 backdrop-blur-sm" />
-      </div>
+      {/* Seamless background - no visible transition */}
+      <div className="absolute inset-0 z-0 bg-background/80 backdrop-blur-[2px]" />
       
       <div className="container mx-auto px-6 md:px-12 relative z-10">
         {/* ABOUT GRID */}
