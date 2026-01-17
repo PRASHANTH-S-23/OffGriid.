@@ -1,157 +1,143 @@
-# OffGriid: The Complete Manual
+# OffGriid
 
-**Version:** 1.0.0
-**Date:** January 16, 2026
-**Project:** OffGriid (Formerly Bitchat)
+**De-Centralized. Offline. Secure.**
 
----
-
-## Table of Contents
-1.  [Executive Summary](#1-executive-summary)
-2.  [User Guide](#2-user-guide)
-3.  [Developer Guide](#3-developer-guide)
-4.  [Technical Architecture](#4-technical-architecture)
-5.  [Codebase Navigation](#5-codebase-navigation)
-6.  [Website & Distribution](#6-website--distribution)
-7.  [Troubleshooting & FAQ](#7-troubleshooting--faq)
+OffGriid is a flagship, peer-to-peer (P2P) mesh messaging application for Android. It enables reliable, secure, and private communication **without the internet**, cellular networks, or central servers. Built for resilience, it creates a self-healing local network using your device's Bluetooth Low Energy (BLE) capabilities.
 
 ---
 
-## 1. Executive Summary
+## Problem Statement
 
-**OffGriid** is a fully autonomous, offline-first messaging network for Android. It allows devices to communicate directly with one another using Bluetooth Low Energy (BLE) mesh networking, eliminating the need for internet access, cellular data, or central servers.
+In our hyper-connected world, true communication resilience is rare:
+*   **Centralization**: WhatsApp, Telegram, and Signal rely on central servers. If they go down, you go offline.
+*   **Censorship**: Internet shutdowns and ISP blocking can silence entire populations.
+*   **Disasters**: Hurricanes, floods, and earthquakes often destroy cellular towers, leaving survivors isolated when communication is most critical.
+*   **Surveillance**: Metadata (who talks to whom) is often logged by service providers.
 
-### Core Value Proposition
-*   **Resilience**: Works during blackouts, natural disasters, and internet censorship.
-*   **Privacy**: Zero-knowledge identity system. No phone numbers, emails, or servers.
-*   **Security**: Military-grade encryption (Noise Protocol) for every packet.
+## The Solution: OffGriid
 
----
-
-## 2. User Guide
-
-### 2.1 Getting Started
-1.  **Installation**: Download and install the `OffGriid.apk`.
-2.  **Permissions**: On first launch, grant **Location** (required for BLE scanning) and **Bluetooth** permissions.
-3.  **Identity Creation**: The app automatically generates your "Identity" (a cryptographic key pair). You do not need to sign up.
-
-### 2.2 detailed Workflow
-*   **Discovery**: The app automatically scans for nearby OffGriid users. When a user comes within range (approx. 10-50 meters), they will appear in your "Nearby" list.
-*   **Chatting**: Tap on a user to start a session. The first connection establishes a secure encrypted tunnel.
-*   **Verification**: To ensure you are talking to the right person, you can compare the "Security Fingerprint" (a visual representation of their public key) in the chat settings.
-
-### 2.3 Settings
-*   **Display Name**: You can set a local display name. Note that this is not global; other users see you by your public key unless they save your name contact.
-*   **Theme**: Toggle between Light and Dark mode (Dark mode is optimized for battery saving in emergencies).
+OffGriid completely decouples communication from infrastructure.
+*   **No Internet Required**: Works in the middle of a desert, on a plane, or during a total blackout.
+*   **Zero Metadata**: No phone numbers, no emails, no central user database. You are just a cryptographic key.
+*   **Mesh Networking**: Messages hop from device to device to reach their destination (Store-and-Forward relay).
 
 ---
 
-## 3. Developer Guide
+## Use Cases
 
-### 3.1 Prerequisites
-*   **OS**: Windows, macOS, or Linux.
-*   **IDE**: Android Studio Koala Feature Drop (or newer).
-*   **Java**: JDK 17+.
-*   **Android SDK**: API Level 35 (minimum API 26).
-
-### 3.2 Build Instructions
-1.  **Clone**:
-    ```bash
-    git clone https://github.com/bitchat-android-main/offgriid.git
-    cd offgriid
-    ```
-2.  **Clean & Build**:
-    ```bash
-    ./gradlew clean
-    ./gradlew assembleDebug
-    ```
-3.  **Output**:
-    The APK will be located at: `app/build/outputs/apk/debug/app-universal-debug.apk`.
-
-### 3.3 Running Tests
-*   **Unit Tests**: `./gradlew test`
-*   **Instrumented Tests**: `./gradlew connectedAndroidTest` (Requires connected device/emulator).
+*   **Disaster Relief**: Coordination between rescue teams and survivors when power/cell service is lost.
+*   **Privacy Advocates**: Zero-knowledge communication for whistleblowers and activists.
+*   **Remote Adventures**: Hiking groups, camping trips, and maritime convoys.
+*   **Hyper-Local Events**: Festivals, conferences, and protests where local decongestion is needed.
 
 ---
 
-## 4. Technical Architecture
+## Tech Stack
 
-OffGriid is built on a custom stack designed for low-bandwidth, high-latency ad-hoc networks.
+Built with modern, cutting-edge Android technologies:
 
-### 4.1 Networking Layer (Mesh)
-*   **Protocol**: Bluetooth Low Energy (BLE).
-*   **Role Management**: Devices dynamically switch between *Central* (Client) and *Peripheral* (Server) modes to maximize connectivity.
-*   **Fragmentation**: Large messages are split into 512-byte chunks (or smaller, depending on negotiated MTU) to fit within BLE packet limits.
-
-### 4.2 specific Cryptography
-*   **Identity**: Ed25519 (Elliptic Curve Signature Scheme). Users are identified by their Public Key (`npub`).
-*   **Transport Encryption**: **Noise Protocol Framework** (Pattern `XX`).
-    *   **Cipher**: ChaCha20-Poly1305.
-    *   **Hash**: BLAKE2b.
-    *   **Key Exchange**: X25519.
-*   **Forward Secrecy**: Session keys are ephemeral and rotate, ensuring past messages cannot be decrypted even if long-term keys are compromised.
-
-### 4.3 Data Format (Nostr)
-We utilize the **Nostr (NIP-01)** event structure for compatibility and extensibility.
-*   **Event Object**:
-    ```json
-    {
-      "id": "sha256_hash",
-      "pubkey": "sender_public_key",
-      "created_at": 1709823456,
-      "kind": 4,
-      "tags": [],
-      "content": "encrypted_base64_string",
-      "sig": "schnorr_signature"
-    }
-    ```
+*   **Language**: Kotlin (100% Native)
+*   **UI Framework**: Jetpack Compose (Material 3 Design)
+*   **Architecture**: MVVM + Clean Architecture
+*   **Dependency Injection**: Hilt (Dagger)
+*   **Concurrency**: Kotlin Coroutines & Flow
+*   **Local Database**: Room (SQLite)
+*   **Networking**: Android Bluetooth Low Energy (BLE)
+    *   Central & Peripheral Modes
+    *   Custom GATT Server/Client implementation
+*   **Cryptography**:
+    *   **Noise Protocol Framework** (ChaCha20-Poly1305, Curve25519, BLAKE2b)
+    *   **Ed25519** (Signatures & Identity)
+    *   **Argon2id** (Key Derivation)
+    *   **BouncyCastle** (Crypto Primitives)
 
 ---
 
-## 5. Codebase Navigation
+## Security & Cryptography
 
-A map of the project structure (`app/src/main/java/com/bitchat/android/`):
+OffGriid prioritizes **Verification** and **Encryption**.
 
-| Package | Description |
-| :--- | :--- |
-| **`mesh/`** | **The Implementation Core.** Handles BLE scanning, advertising, connection management (`BluetoothConnectionManager`), and packet fragmentation (`BluetoothPacketBroadcaster`). |
-| **`noise/`** | **Security Layer.** Implements the Noise Protocol state machine (`NoiseSession`) and handshake logic. |
-| **`nostr/`** | **Data Protocol.** Handles Nostr event creation, signing (`NostrClient`), and serialization. |
-| **`identity/`**| Key management and secure storage (`SecureIdentityStateManager`). |
-| **`ui/`** | Jetpack Compose screens (`ChatScreen`, `NearbyScreen`) and Verify UI. |
-| **`crypto/`** | Legacy wrappers and utility functions for encryption. |
+### 1. Identity (Zero-Knowledge)
+*   Identities are generated locally on the device.
+*   **Key Pair**: Ed25519 (Edwards-curve Digital Signature Algorithm).
+*   **Fingerprint**: Users are identified by the SHA-256 hash of their public key. No centralized registry.
 
----
+### 2. Transport Encryption (Noise Protocol)
+We use the **Noise Protocol Framework** (specifically `Noise_XX_25519_ChaChaPoly_BLAKE2b`) for Authenticated Key Exchange (AKE).
+*   **Forward Secrecy**: New session keys are derived for every session. Compromising a long-term key does not compromise past messages.
+*   **Bidirectional Secrecy**: Both parties authenticate each other via the handshake.
 
-## 6. Website & Distribution
-
-A dedicated landing page is included in the `website/` directory for easy distribution.
-
-### 6.1 Website Contents
-*   `index.html`: Main landing page with "Download" CTA.
-*   `style.css`: Premium dark-mode styling.
-*   `OffGriid.apk`: The self-hosted installer file.
-
-### 6.2 Deployment
-To launch the download site:
-1.  Navigate to the `website/` folder.
-2.  Upload the entire folder to a static host (e.g., GitHub Pages, Netlify, Vercel).
-3.  Users can visit the URL and click "Download APK".
-
-**Note**: To update the app version, simply replace the `OffGriid.apk` file in the website folder and update the version text in `index.html`.
+### 3. MITM Mitigation (Verification)
+To prevent Man-In-The-Middle (MITM) attacks where an attacker impersonates a peer:
+*   **QR Verification**: Users can scan each other's QR code on the "Verification Screen".
+*   **Fingerprint Comparison**: The app verifies the cryptographic fingerprint of the scanned peer against the connected session.
+*   **Verified Badge**: Once verified, the peer gets a "Verified" badge in the UI.
 
 ---
 
-## 7. Troubleshooting & FAQ
+## How It Works (Under the Hood)
 
-**Q: Why can't I see nearby devices?**
-A: Ensure **Location Services** are enabled. Android requires Location permission to scan for BLE devices. Also, check that both devices have the app open in the foreground.
+### 1. Discovery & Handshake
+Devices constantly advertise their presence (via BLE Advertising) and scan for others. When discovered:
 
-**Q: Is it compatible with iPhones?**
-A: Currently, OffGriid is Android-only due to restrictions on iOS background Bluetooth advertising.
+1.  **Connection**: GATT Client connects to GATT Server.
+2.  **Reverse Connection**: Server initiates a connection back to the Client for bidirectional flow.
+3.  **Identity Handshake**: Both devices exchange a `PEER_ANNOUNCEMENT` packet containing their Ed25519 Public Key and a challenge signature.
+4.  **Encryption Handshake**: The **Noise Protocol** handshake ensues to derive shared secret keys.
 
-**Q: Can I send images?**
-A: Not in v1.0. Text-only to ensure reliability over low-bandwidth BLE connections.
+### Sequence Diagram
 
-**Q: How do I verify a build?**
-A: Run `./gradlew test` to ensure all unit tests pass. Inspect `app/build.gradle.kts` to verify dependencies.
+![Sequence Diagram](/public/sequence.png)
+
+
+### 2. Mesh Relay (Packet Routing)
+If Alice wants to send a message to Charlie, but Charlie is out of range:
+`Alice -> Bob -> Charlie`
+*   Packets have a **Time-To-Live (TTL)** to prevent infinite loops.
+*   Bob's device receives the packet, checks if he is the recipient. If not, he rebroadcasts it to his connected peers.
+
+---
+
+## Key Features
+
+### Rich Messaging
+*   **Text**: Instant secure text messaging.
+*   **Voice Notes**: Record and send compressed AAC voice notes (optimized for low bandwidth BLE).
+*   **Images**: Share compressed images securely.
+
+### Favorites & Personalization
+*   **Add to Favorites**: Long-press any peer in the Home Screen to star them. They appear at the top.
+*   **Nicknames**: Assign local nicknames to complex cryptographic IDs (e.g., "Mom" instead of "a1b2...").
+
+### Device Verification (Anti-MITM)
+1.  Go to **Profile** -> **Show QR**.
+2.  Your friend goes to **Scan QR**.
+3.  Camera scans the code.
+4.  App validates the Public Key matches the active BLE session.
+5.  **Secure!** No one is intercepting your chat.
+
+---
+
+## Project Structure
+
+```
+com.offgrid.app
+├── data
+│   ├── local         # Room Database (Messages, Peers)
+│   └── repository    # Repository Implementations
+├── domain
+│   ├── model         # Data Classes (Packet, Peer, Message)
+│   ├── network       # BLE Logic (BleManager, PacketRouter)
+│   └── repository    # Interfaces
+├── ui
+│   ├── components    # Reusable UI (Bubbles, TopBars)
+│   ├── screens
+│   │   ├── chat      # Chat Screen & ViewModel
+│   │   ├── home      # Peer List
+│   │   ├── welcome   # Permissions & Onboarding
+│   │   └── verification # QR Code Scanning
+│   └── theme         # Theme & Color Palette
+└── di                # Hilt Modules
+```
+
+*Privacy is not a crime. It is a prerequisite for freedom.*
