@@ -7,7 +7,10 @@ const Hero = () => {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Curved decoration */}
-      <CurveDecoration className="absolute bottom-0 left-0 right-0 z-10" />
+      <CurveDecoration className="absolute bottom-0 left-0 right-0 z-10 translate-y-1/2" />
+      
+      {/* Bottom gradient fade for smooth transition */}
+      <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-background/80 via-background/40 to-transparent z-[5] pointer-events-none" />
 
       {/* Hero Content */}
       <div className="relative z-20 container mx-auto px-6 md:px-12 text-center">
