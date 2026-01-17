@@ -2,6 +2,8 @@ import { useRef } from 'react';
 import { useGSAP } from '@gsap/react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { StepDrawer, InfoStep } from './StepDrawer';
+
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -96,15 +98,6 @@ const About = () => {
     { scope: sectionRef }
   );
 
-  const handleDownloadAPK = () => {
-    const link = document.createElement('a');
-    link.href = '/OffGriid.apk';
-    link.download = 'OffGriid.apk';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   return (
     <section
       ref={sectionRef}
@@ -187,67 +180,45 @@ const About = () => {
 
           <div ref={stepsRef} className="grid md:grid-cols-3 gap-12 text-center">
             {/* Step 01 */}
-            <div className="flex flex-col items-center">
-              <span className="mb-4 inline-flex items-center justify-center w-10 h-10 rounded-full bg-accent/10 text-accent text-sm font-medium">
-                01
-              </span>
-              <h4 className="text-lg font-medium text-foreground mb-2">
-                Install APK
-              </h4>
-              <p className="text-sm text-muted-foreground mb-4 max-w-xs">
-                Download and install the OffGriid APK directly — no app stores, no
-                accounts.
-              </p>
-              <button
-                onClick={handleDownloadAPK}
-                className="text-sm text-accent hover:underline cursor-pointer inline-flex items-center gap-2 transition-colors hover:text-accent/80"
-              >
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  width="16" 
-                  height="16" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  strokeWidth="2" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round"
-                >
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                  <polyline points="7 10 12 15 17 10" />
-                  <line x1="12" x2="12" y1="15" y2="3" />
-                </svg>
-                Download APK
-              </button>
-            </div>
+              <StepDrawer
+                stepNumber={1}
+                title="Install APK"
+                description="Download and install the OffGriid APK directly — no app stores, no accounts."
+                downloadUrl="/apk/offgriid-1.0.0.apk"
+                fileName="offgriid-1.0.0.apk"
+                sha256="42ADF9BA6D0D3ED4A359936C9687C975EA4AB1ADD6C775F434D40A1981FC52AD"
+                instructions={[
+                  "Download the APK file above",
+                  "Open the downloaded file",
+                  "Allow 'Install from unknown sources' if prompted",
+                  "Follow the installation wizard",
+                ]}
+              />
+              {/* Step 02 */}
+              <InfoStep
+                stepNumber={2}
+                title="Generate Identity"
+                description="On first launch, OffGriid automatically creates a secure cryptographic identity, no sign-up required."
+                details={[
+                  "Open OffGriid app for the first time",
+                  "App generates Ed25519 key pair locally on your device",
+                  "Your identity is created - no server communication",
+                  "Keys are stored securely in device keystore",
+                ]}
+              />
 
-            {/* Step 02 */}
-            <div className="flex flex-col items-center">
-              <span className="mb-4 inline-flex items-center justify-center w-10 h-10 rounded-full bg-accent/10 text-accent text-sm font-medium">
-                02
-              </span>
-              <h4 className="text-lg font-medium text-foreground mb-2">
-                Generate Identity
-              </h4>
-              <p className="text-sm text-muted-foreground max-w-xs">
-                On first launch, OffGriid automatically creates a secure cryptographic
-                identity — no sign-up required.
-              </p>
-            </div>
-
-            {/* Step 03 */}
-            <div className="flex flex-col items-center">
-              <span className="mb-4 inline-flex items-center justify-center w-10 h-10 rounded-full bg-accent/10 text-accent text-sm font-medium">
-                03
-              </span>
-              <h4 className="text-lg font-medium text-foreground mb-2">
-                Auto-Mesh
-              </h4>
-              <p className="text-sm text-muted-foreground max-w-xs">
-                Nearby devices are discovered automatically using Bluetooth Low Energy
-                and form a secure peer-to-peer mesh.
-              </p>
-            </div>
+              {/* Step 03 */}
+              <InfoStep
+                stepNumber={3}
+                title="Auto-Mesh"
+                description="Nearby devices are discovered automatically using Bluetooth Low Energy and form a secure peer-to-peer mesh."
+                details={[
+                  "BLE scanning discovers nearby OffGriid devices",
+                  "Secure handshake establishes encrypted connection",
+                  "Devices automatically relay messages across the mesh",
+                  "Works completely offline - no internet needed",
+                ]}
+              />
           </div>
         </div>
       </div>
