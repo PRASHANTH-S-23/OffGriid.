@@ -1,5 +1,4 @@
 import SplitText from './SplitText';
-import LiquidEther from './LiquidEther';
 import CurveDecoration from './CurveDecoration';
 import { Button } from '@/components/ui/button';
 import '@fontsource/jetbrains-mono';
@@ -7,19 +6,6 @@ import '@fontsource/jetbrains-mono';
 const Hero = () => {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Liquid Ether Background */}
-      <div className="absolute inset-0 z-0">
-        <LiquidEther
-          colors={['#00FF66', '#00CC55', '#0E1F17']}
-          mouseForce={20}
-          cursorSize={120}
-          resolution={0.5}
-          autoDemo={true}
-          autoSpeed={0.4}
-          autoIntensity={2.5}
-        />
-      </div>
-
       {/* Curved decoration */}
       <CurveDecoration className="absolute bottom-0 left-0 right-0 z-10" />
 
@@ -39,7 +25,7 @@ const Hero = () => {
           />
           
           <p className="mt-8 text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto opacity-0 animate-fade-in" style={{ animationDelay: '1.2s' }}>
-            An offline-first, encrypted messaging network that works when the internet doesn’t.
+            An offline-first, encrypted messaging network that works when the internet doesn't.
           </p>
           
           <div className="mt-12 flex items-center justify-center gap-4 opacity-0 animate-fade-in" style={{ animationDelay: '1.5s' }}>

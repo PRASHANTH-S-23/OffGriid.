@@ -32,13 +32,25 @@ const About = () => {
     { scope: sectionRef }
   );
 
+  const handleDownloadAPK = () => {
+    const link = document.createElement('a');
+    link.href = '/OffGriid.apk';
+    link.download = 'OffGriid.apk';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <section
       ref={sectionRef}
       id="about"
-      className="relative py-32 md:py-48 bg-background"
+      className="relative py-32 md:py-48 bg-transparent"
     >
-      <div className="container mx-auto px-6 md:px-12">
+      {/* Semi-transparent overlay to make content readable over ether */}
+      <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-0" />
+      
+      <div className="container mx-auto px-6 md:px-12 relative z-10">
         {/* ABOUT GRID */}
         <div className="grid md:grid-cols-2 gap-12 md:gap-24 items-start">
         {/* Left Visual */}
@@ -57,6 +69,7 @@ const About = () => {
               src="/mesh.webp"
               alt="OffGriid mesh network visualization"
               className="w-full h-full object-cover"
+              loading="lazy"
             />
           </div>
         </div>
@@ -119,12 +132,27 @@ const About = () => {
                 Download and install the OffGriid APK directly — no app stores, no
                 accounts.
               </p>
-              <a
-                href="/OffGriid.apk"
-                className="text-sm text-accent hover:underline"
+              <button
+                onClick={handleDownloadAPK}
+                className="text-sm text-accent hover:underline cursor-pointer inline-flex items-center gap-2 transition-colors hover:text-accent/80"
               >
-                Download APK →
-              </a>
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  width="16" 
+                  height="16" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                >
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" x2="12" y1="15" y2="3" />
+                </svg>
+                Download APK
+              </button>
             </div>
 
             {/* Step 02 */}
