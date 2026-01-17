@@ -1,9 +1,8 @@
-import { useRef } from 'react';
-import { useGSAP } from '@gsap/react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { StepDrawer, InfoStep } from './StepDrawer';
-
+import { useRef } from "react";
+import { useGSAP } from "@gsap/react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { StepDrawer, InfoStep } from "./StepDrawer";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -18,7 +17,7 @@ const About = () => {
     () => {
       if (!sectionRef.current) return;
 
-      // Text reveal with parallax
+      // Text reveal
       gsap.fromTo(
         textRef.current,
         { opacity: 0, y: 80 },
@@ -26,34 +25,34 @@ const About = () => {
           opacity: 1,
           y: 0,
           duration: 1.2,
-          ease: 'power3.out',
+          ease: "power3.out",
           scrollTrigger: {
             trigger: textRef.current,
-            start: 'top 85%',
-            end: 'top 50%',
+            start: "top 85%",
+            end: "top 50%",
             scrub: 0.5,
           },
         }
       );
 
-      // Image parallax - moves slower than scroll for depth
+      // Image parallax
       gsap.fromTo(
         imageRef.current,
         { y: 100, scale: 0.95 },
         {
           y: -50,
           scale: 1,
-          ease: 'none',
+          ease: "none",
           scrollTrigger: {
             trigger: imageRef.current,
-            start: 'top bottom',
-            end: 'bottom top',
+            start: "top bottom",
+            end: "bottom top",
             scrub: 0.8,
           },
         }
       );
 
-      // Stats staggered reveal
+      // Stats stagger
       const statItems = statsRef.current?.children;
       if (statItems) {
         gsap.fromTo(
@@ -64,17 +63,17 @@ const About = () => {
             y: 0,
             duration: 0.8,
             stagger: 0.2,
-            ease: 'power2.out',
+            ease: "power2.out",
             scrollTrigger: {
               trigger: statsRef.current,
-              start: 'top 80%',
+              start: "top 80%",
               once: true,
             },
           }
         );
       }
 
-      // Steps parallax reveal
+      // Steps stagger
       const stepItems = stepsRef.current?.children;
       if (stepItems) {
         gsap.fromTo(
@@ -85,10 +84,10 @@ const About = () => {
             y: 0,
             duration: 0.8,
             stagger: 0.15,
-            ease: 'power2.out',
+            ease: "power2.out",
             scrollTrigger: {
               trigger: stepsRef.current,
-              start: 'top 75%',
+              start: "top 75%",
               once: true,
             },
           }
@@ -102,17 +101,15 @@ const About = () => {
     <section
       ref={sectionRef}
       id="about"
-      className="relative pt-16 md:pt-24 pb-32 md:pb-48 bg-transparent overflow-hidden"
+      className="relative pt-16 md:pt-24 pb-32 md:pb-48 overflow-hidden"
     >
-      {/* Seamless background - no visible transition */}
       <div className="absolute inset-0 z-0 bg-background/80 backdrop-blur-[2px]" />
-      
+
       <div className="container mx-auto px-6 md:px-12 relative z-10">
         {/* ABOUT GRID */}
         <div className="grid md:grid-cols-2 gap-12 md:gap-24 items-start">
-          {/* Left Visual */}
+          {/* Left */}
           <div className="flex flex-col gap-6">
-            {/* Label */}
             <div className="flex items-center gap-3">
               <span className="inline-block w-2 h-2 rounded-full bg-accent" />
               <span className="text-sm uppercase tracking-widest text-muted-foreground">
@@ -120,8 +117,7 @@ const About = () => {
               </span>
             </div>
 
-            {/* Image with parallax */}
-            <div 
+            <div
               ref={imageRef}
               className="relative w-full aspect-[4/5] rounded-2xl overflow-hidden border border-border will-change-transform"
             >
@@ -134,23 +130,25 @@ const About = () => {
             </div>
           </div>
 
-          {/* Description */}
+          {/* Right */}
           <div>
             <p
               ref={textRef}
               className="text-2xl md:text-3xl lg:text-4xl font-light leading-relaxed text-foreground text-justify will-change-transform"
             >
-              OffGriid is an offline-first, peer-to-peer messaging network built for
-              moments when traditional communication infrastructure fails. Using
-              Bluetooth Low Energy mesh networking and modern cryptography, devices
-              communicate directly without servers, phone numbers, or internet access.
-              <br /><br />
-              Designed for resilience, privacy, and autonomy, OffGriid operates during
-              blackouts, natural disasters, remote deployments, and network shutdowns —
-              ensuring secure communication when it matters most.
+              OffGriid is an offline-first, peer-to-peer messaging network built
+              for moments when traditional communication infrastructure fails.
+              Using Bluetooth Low Energy mesh networking and modern cryptography,
+              devices communicate directly without servers, phone numbers, or
+              internet access.
+              <br />
+              <br />
+              Designed for resilience, privacy, and autonomy, OffGriid operates
+              during blackouts, natural disasters, remote deployments, and
+              network shutdowns — ensuring secure communication when it matters
+              most.
             </p>
 
-            {/* Stats with stagger animation */}
             <div ref={statsRef} className="mt-12 grid grid-cols-2 gap-8">
               <div>
                 <span className="text-4xl md:text-5xl font-light text-foreground">
@@ -178,8 +176,12 @@ const About = () => {
             How It Works
           </h3>
 
-          <div ref={stepsRef} className="grid md:grid-cols-3 gap-12 text-center">
+          <div
+            ref={stepsRef}
+            className="grid md:grid-cols-3 gap-12 text-center"
+          >
             {/* Step 01 */}
+            <div className="flex flex-col items-center">
               <StepDrawer
                 stepNumber={1}
                 title="Install APK"
@@ -187,38 +189,38 @@ const About = () => {
                 downloadUrl="/apk/offgriid-1.0.0.apk"
                 fileName="offgriid-1.0.0.apk"
                 sha256="42ADF9BA6D0D3ED4A359936C9687C975EA4AB1ADD6C775F434D40A1981FC52AD"
-                instructions={[
-                  "Download the APK file above",
-                  "Open the downloaded file",
-                  "Allow 'Install from unknown sources' if prompted",
-                  "Follow the installation wizard",
-                ]}
               />
-              {/* Step 02 */}
+            </div>
+
+            {/* Step 02 */}
+            <div className="flex flex-col items-center">
               <InfoStep
                 stepNumber={2}
                 title="Generate Identity"
                 description="On first launch, OffGriid automatically creates a secure cryptographic identity, no sign-up required."
                 details={[
-                  "Open OffGriid app for the first time",
-                  "App generates Ed25519 key pair locally on your device",
-                  "Your identity is created - no server communication",
-                  "Keys are stored securely in device keystore",
+                  "Open OffGriid for the first time",
+                  "App generates an Ed25519 key pair locally",
+                  "No server communication occurs",
+                  "Keys are stored securely on-device",
                 ]}
               />
+            </div>
 
-              {/* Step 03 */}
+            {/* Step 03 */}
+            <div className="flex flex-col items-center">
               <InfoStep
                 stepNumber={3}
                 title="Auto-Mesh"
                 description="Nearby devices are discovered automatically using Bluetooth Low Energy and form a secure peer-to-peer mesh."
                 details={[
-                  "BLE scanning discovers nearby OffGriid devices",
-                  "Secure handshake establishes encrypted connection",
-                  "Devices automatically relay messages across the mesh",
-                  "Works completely offline - no internet needed",
+                  "BLE discovers nearby OffGriid devices",
+                  "Encrypted handshake establishes trust",
+                  "Messages relay across the mesh",
+                  "Works fully offline",
                 ]}
               />
+            </div>
           </div>
         </div>
       </div>
