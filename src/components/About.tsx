@@ -8,26 +8,90 @@ gsap.registerPlugin(ScrollTrigger);
 const About = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const textRef = useRef<HTMLParagraphElement>(null);
+  const imageRef = useRef<HTMLDivElement>(null);
+  const statsRef = useRef<HTMLDivElement>(null);
+  const stepsRef = useRef<HTMLDivElement>(null);
 
   useGSAP(
     () => {
-      if (!textRef.current) return;
+      if (!sectionRef.current) return;
 
+      // Text reveal with parallax
       gsap.fromTo(
         textRef.current,
-        { opacity: 0, y: 40 },
+        { opacity: 0, y: 80 },
         {
           opacity: 1,
           y: 0,
-          duration: 1,
+          duration: 1.2,
           ease: 'power3.out',
           scrollTrigger: {
             trigger: textRef.current,
-            start: 'top 80%',
-            once: true,
+            start: 'top 85%',
+            end: 'top 50%',
+            scrub: 0.5,
           },
         }
       );
+
+      // Image parallax - moves slower than scroll for depth
+      gsap.fromTo(
+        imageRef.current,
+        { y: 100, scale: 0.95 },
+        {
+          y: -50,
+          scale: 1,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: imageRef.current,
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: 0.8,
+          },
+        }
+      );
+
+      // Stats staggered reveal
+      const statItems = statsRef.current?.children;
+      if (statItems) {
+        gsap.fromTo(
+          statItems,
+          { opacity: 0, y: 40 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.8,
+            stagger: 0.2,
+            ease: 'power2.out',
+            scrollTrigger: {
+              trigger: statsRef.current,
+              start: 'top 80%',
+              once: true,
+            },
+          }
+        );
+      }
+
+      // Steps parallax reveal
+      const stepItems = stepsRef.current?.children;
+      if (stepItems) {
+        gsap.fromTo(
+          stepItems,
+          { opacity: 0, y: 60 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.8,
+            stagger: 0.15,
+            ease: 'power2.out',
+            scrollTrigger: {
+              trigger: stepsRef.current,
+              start: 'top 75%',
+              once: true,
+            },
+          }
+        );
+      }
     },
     { scope: sectionRef }
   );
@@ -45,7 +109,7 @@ const About = () => {
     <section
       ref={sectionRef}
       id="about"
-      className="relative py-32 md:py-48 bg-transparent"
+      className="relative py-32 md:py-48 bg-transparent overflow-hidden"
     >
       {/* Smooth gradient transition from hero */}
       <div className="absolute inset-0 z-0">
@@ -58,33 +122,35 @@ const About = () => {
       <div className="container mx-auto px-6 md:px-12 relative z-10">
         {/* ABOUT GRID */}
         <div className="grid md:grid-cols-2 gap-12 md:gap-24 items-start">
-        {/* Left Visual */}
-        <div className="flex flex-col gap-6">
-          {/* Label */}
-          <div className="flex items-center gap-3">
-            <span className="inline-block w-2 h-2 rounded-full bg-accent" />
-            <span className="text-sm uppercase tracking-widest text-muted-foreground">
-              About OffGriid
-            </span>
-          </div>
+          {/* Left Visual */}
+          <div className="flex flex-col gap-6">
+            {/* Label */}
+            <div className="flex items-center gap-3">
+              <span className="inline-block w-2 h-2 rounded-full bg-accent" />
+              <span className="text-sm uppercase tracking-widest text-muted-foreground">
+                About OffGriid
+              </span>
+            </div>
 
-          {/* Image */}
-          <div className="relative w-full aspect-[4/5] rounded-2xl overflow-hidden border border-border">
-            <img
-              src="/mesh.webp"
-              alt="OffGriid mesh network visualization"
-              className="w-full h-full object-cover"
-              loading="lazy"
-            />
+            {/* Image with parallax */}
+            <div 
+              ref={imageRef}
+              className="relative w-full aspect-[4/5] rounded-2xl overflow-hidden border border-border will-change-transform"
+            >
+              <img
+                src="/mesh.webp"
+                alt="OffGriid mesh network visualization"
+                className="w-full h-full object-cover scale-110"
+                loading="lazy"
+              />
+            </div>
           </div>
-        </div>
-
 
           {/* Description */}
           <div>
             <p
               ref={textRef}
-              className="text-2xl md:text-3xl lg:text-4xl font-light leading-relaxed text-foreground text-justify"
+              className="text-2xl md:text-3xl lg:text-4xl font-light leading-relaxed text-foreground text-justify will-change-transform"
             >
               OffGriid is an offline-first, peer-to-peer messaging network built for
               moments when traditional communication infrastructure fails. Using
@@ -96,8 +162,8 @@ const About = () => {
               ensuring secure communication when it matters most.
             </p>
 
-            {/* Stats */}
-            <div className="mt-12 grid grid-cols-2 gap-8">
+            {/* Stats with stagger animation */}
+            <div ref={statsRef} className="mt-12 grid grid-cols-2 gap-8">
               <div>
                 <span className="text-4xl md:text-5xl font-light text-foreground">
                   Offline
@@ -124,7 +190,7 @@ const About = () => {
             How It Works
           </h3>
 
-          <div className="grid md:grid-cols-3 gap-12 text-center">
+          <div ref={stepsRef} className="grid md:grid-cols-3 gap-12 text-center">
             {/* Step 01 */}
             <div className="flex flex-col items-center">
               <span className="mb-4 inline-flex items-center justify-center w-10 h-10 rounded-full bg-accent/10 text-accent text-sm font-medium">
