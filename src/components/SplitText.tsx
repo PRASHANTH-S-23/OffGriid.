@@ -1,9 +1,4 @@
 import { useRef, useEffect, useState } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { useGSAP } from '@gsap/react';
-
-gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 interface SplitTextProps {
   text: string;
@@ -12,8 +7,22 @@ interface SplitTextProps {
   duration?: number;
   ease?: string;
   splitType?: 'chars' | 'words' | 'lines';
-  from?: gsap.TweenVars;
-  to?: gsap.TweenVars;
+  from?: {
+    opacity?: number;
+    y?: number;
+    x?: number;
+    rotateX?: number;
+    rotateY?: number;
+    scale?: number;
+  };
+  to?: {
+    opacity?: number;
+    y?: number;
+    x?: number;
+    rotateX?: number;
+    rotateY?: number;
+    scale?: number;
+  };
   threshold?: number;
   rootMargin?: string;
   textAlign?: 'left' | 'center' | 'right';
@@ -37,15 +46,11 @@ const SplitText = ({
   onLetterAnimationComplete
 }: SplitTextProps) => {
   const ref = useRef<HTMLElement>(null);
-  const animationCompletedRef = useRef(false);
-  const onCompleteRef = useRef(onLetterAnimationComplete);
+  const [isVisible, setIsVisible] = useState(false);
   const [fontsLoaded, setFontsLoaded] = useState(false);
   const [chars, setChars] = useState<string[]>([]);
 
-  useEffect(() => {
-    onCompleteRef.current = onLetterAnimationComplete;
-  }, [onLetterAnimationComplete]);
-
+  // Wait for fonts to load
   useEffect(() => {
     if (document.fonts.status === 'loaded') {
       setFontsLoaded(true);
@@ -56,6 +61,7 @@ const SplitText = ({
     }
   }, []);
 
+  // Split text into chars/words
   useEffect(() => {
     if (splitType === 'chars') {
       setChars(text.split(''));
@@ -66,116 +72,134 @@ const SplitText = ({
     }
   }, [text, splitType]);
 
-  useGSAP(
-    () => {
-      if (!ref.current || !text || !fontsLoaded || chars.length === 0) return;
-      if (animationCompletedRef.current) return;
+  // IntersectionObserver for scroll-triggered animation
+  useEffect(() => {
+    if (!ref.current || chars.length === 0 || !fontsLoaded) return;
 
-      const el = ref.current;
-      const targets = el.querySelectorAll('.split-char');
-      
-      if (targets.length === 0) return;
-
-      const startPct = (1 - threshold) * 100;
-      const marginMatch = /^(-?\d+(?:\.\d+)?)(px|em|rem|%)?$/.exec(rootMargin);
-      const marginValue = marginMatch ? parseFloat(marginMatch[1]) : 0;
-      const marginUnit = marginMatch ? marginMatch[2] || 'px' : 'px';
-      const sign =
-        marginValue === 0
-          ? ''
-          : marginValue < 0
-            ? `-=${Math.abs(marginValue)}${marginUnit}`
-            : `+=${marginValue}${marginUnit}`;
-      const start = `top ${startPct}%${sign}`;
-
-      gsap.fromTo(
-        targets,
-        { ...from },
-        {
-          ...to,
-          duration,
-          ease,
-          stagger: delay / 1000,
-          scrollTrigger: {
-            trigger: el,
-            start,
-            once: true,
-            fastScrollEnd: true
-          },
-          onComplete: () => {
-            animationCompletedRef.current = true;
-            onCompleteRef.current?.();
-          },
-          willChange: 'transform, opacity',
-          force3D: true
-        }
-      );
-
-      return () => {
-        ScrollTrigger.getAll().forEach(st => {
-          if (st.trigger === el) st.kill();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !isVisible) {
+            setIsVisible(true);
+            
+            // Call completion callback after animation finishes
+            if (onLetterAnimationComplete) {
+              const totalDuration = (chars.length * delay) + (duration * 1000);
+              setTimeout(onLetterAnimationComplete, totalDuration);
+            }
+          }
         });
-      };
-    },
-    {
-      dependencies: [
-        text,
-        delay,
-        duration,
-        ease,
-        splitType,
-        JSON.stringify(from),
-        JSON.stringify(to),
+      },
+      {
         threshold,
         rootMargin,
-        fontsLoaded,
-        chars
-      ],
-      scope: ref
-    }
-  );
+      }
+    );
 
-  const renderContent = () => {
-    return chars.map((char, index) => (
-      <span 
-        key={index} 
-        className="split-char inline-block"
-        style={{ opacity: 0 }}
-      >
-        {char === ' ' ? '\u00A0' : char}
-        {splitType === 'words' && index < chars.length - 1 ? '\u00A0' : ''}
-      </span>
-    ));
+    observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [chars, threshold, rootMargin, isVisible, delay, duration, onLetterAnimationComplete, fontsLoaded]);
+
+  // Convert GSAP easing to CSS cubic-bezier
+  const getEasing = (easeName: string) => {
+    const easings: Record<string, string> = {
+      'power3.out': 'cubic-bezier(0.215, 0.610, 0.355, 1.000)',
+      'power2.out': 'cubic-bezier(0.165, 0.840, 0.440, 1.000)',
+      'power1.out': 'cubic-bezier(0.250, 0.460, 0.450, 0.940)',
+      'expo.out': 'cubic-bezier(0.190, 1.000, 0.220, 1.000)',
+      'circ.out': 'cubic-bezier(0.075, 0.820, 0.165, 1.000)',
+    };
+    return easings[easeName] || 'cubic-bezier(0.215, 0.610, 0.355, 1.000)';
   };
 
-  const style: React.CSSProperties = {
+  const renderContent = () => {
+    return chars.map((char, index) => {
+      const style: React.CSSProperties = {
+        display: 'inline-block',
+        opacity: isVisible ? (to.opacity ?? 1) : (from.opacity ?? 0),
+        transform: isVisible
+          ? `translate(${to.x ?? 0}px, ${to.y ?? 0}px) rotateX(${to.rotateX ?? 0}deg) rotateY(${to.rotateY ?? 0}deg) scale(${to.scale ?? 1})`
+          : `translate(${from.x ?? 0}px, ${from.y ?? 0}px) rotateX(${from.rotateX ?? 0}deg) rotateY(${from.rotateY ?? 0}deg) scale(${from.scale ?? 1})`,
+        transitionProperty: 'opacity, transform',
+        transitionDuration: `${duration}s`,
+        transitionDelay: `${(index * delay) / 1000}s`,
+        transitionTimingFunction: getEasing(ease),
+        transformOrigin: 'center',
+        willChange: 'transform, opacity',
+        minWidth: char === ' ' ? '0.25em' : 'auto',
+      };
+
+      return (
+        <span key={index} className="split-char" style={style}>
+          {char === ' ' ? '\u00A0' : char}
+          {splitType === 'words' && index < chars.length - 1 ? '\u00A0' : ''}
+        </span>
+      );
+    });
+  };
+
+  const containerStyle: React.CSSProperties = {
     textAlign,
     overflow: 'hidden',
     display: 'inline-block',
     whiteSpace: 'normal',
     wordWrap: 'break-word',
-    willChange: 'transform, opacity'
+    willChange: 'transform, opacity',
   };
-  
-  const classes = `split-parent ${className}`;
 
+  const classes = `split-parent ${className}`;
+  const content = renderContent();
+
+  // Render based on tag type
   switch (tag) {
     case 'h1':
-      return <h1 ref={ref as React.RefObject<HTMLHeadingElement>} style={style} className={classes}>{renderContent()}</h1>;
+      return (
+        <h1 ref={ref as React.RefObject<HTMLHeadingElement>} style={containerStyle} className={classes}>
+          {content}
+        </h1>
+      );
     case 'h2':
-      return <h2 ref={ref as React.RefObject<HTMLHeadingElement>} style={style} className={classes}>{renderContent()}</h2>;
+      return (
+        <h2 ref={ref as React.RefObject<HTMLHeadingElement>} style={containerStyle} className={classes}>
+          {content}
+        </h2>
+      );
     case 'h3':
-      return <h3 ref={ref as React.RefObject<HTMLHeadingElement>} style={style} className={classes}>{renderContent()}</h3>;
+      return (
+        <h3 ref={ref as React.RefObject<HTMLHeadingElement>} style={containerStyle} className={classes}>
+          {content}
+        </h3>
+      );
     case 'h4':
-      return <h4 ref={ref as React.RefObject<HTMLHeadingElement>} style={style} className={classes}>{renderContent()}</h4>;
+      return (
+        <h4 ref={ref as React.RefObject<HTMLHeadingElement>} style={containerStyle} className={classes}>
+          {content}
+        </h4>
+      );
     case 'h5':
-      return <h5 ref={ref as React.RefObject<HTMLHeadingElement>} style={style} className={classes}>{renderContent()}</h5>;
+      return (
+        <h5 ref={ref as React.RefObject<HTMLHeadingElement>} style={containerStyle} className={classes}>
+          {content}
+        </h5>
+      );
     case 'h6':
-      return <h6 ref={ref as React.RefObject<HTMLHeadingElement>} style={style} className={classes}>{renderContent()}</h6>;
+      return (
+        <h6 ref={ref as React.RefObject<HTMLHeadingElement>} style={containerStyle} className={classes}>
+          {content}
+        </h6>
+      );
     case 'span':
-      return <span ref={ref as React.RefObject<HTMLSpanElement>} style={style} className={classes}>{renderContent()}</span>;
+      return (
+        <span ref={ref as React.RefObject<HTMLSpanElement>} style={containerStyle} className={classes}>
+          {content}
+        </span>
+      );
     default:
-      return <p ref={ref as React.RefObject<HTMLParagraphElement>} style={style} className={classes}>{renderContent()}</p>;
+      return (
+        <p ref={ref as React.RefObject<HTMLParagraphElement>} style={containerStyle} className={classes}>
+          {content}
+        </p>
+      );
   }
 };
 

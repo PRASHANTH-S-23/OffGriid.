@@ -28,9 +28,6 @@ const Index = ({ stage }: { stage: number }) => {
         <Hero />
       </Suspense>
 
-      {/* Anchor for smooth scrolling (exists immediately, even before About mounts) */}
-      <div id="about" aria-hidden="true" className="relative z-10 h-px w-px" />
-
       {/* STAGE 1: Navigation (after first paint) */}
       {stage >= 1 && (
         <Navigation onContactClick={() => setIsContactOpen(true)} />
@@ -40,12 +37,12 @@ const Index = ({ stage }: { stage: number }) => {
       {showLiquid && (
         <Suspense fallback={null}>
           <div 
-            className="fixed inset-0 z-0 h-[200vh]"
+            className="fixed inset-0 -z-0 h-[200vh] pointer-events-none"
             style={{ 
               willChange: 'transform',
               transform: 'translate3d(0, 0, 0)',
               backfaceVisibility: 'hidden',
-              contain: 'strict',
+              contain: 'layout style paint',
               pointerEvents: 'none'
             }}
           >
@@ -57,6 +54,7 @@ const Index = ({ stage }: { stage: number }) => {
               autoDemo={true}
               autoSpeed={0.2} 
               autoIntensity={1.2} 
+              className="pointer-events-none" 
             />
           </div>
         </Suspense>

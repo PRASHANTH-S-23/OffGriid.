@@ -66,6 +66,23 @@ const Hero = () => {
     };
   }, [updateScrollTransforms]);
 
+  // Fixed scroll handler
+  const handleScrollToAbout = useCallback(() => {
+    const aboutSection = document.getElementById("about");
+    if (aboutSection) {
+      aboutSection.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    } else {
+      // Fallback: scroll one viewport
+      window.scrollTo({
+        top: window.innerHeight,
+        behavior: "smooth",
+      });
+    }
+  }, []);
+
   return (
     <section
       ref={sectionRef}
@@ -127,29 +144,21 @@ const Hero = () => {
 
           <p
             className="mt-8 text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto opacity-0 animate-fade-in"
-            style={{ animationDelay: "1.2s" }}
+            style={{ animationDelay: "1.2s", animationFillMode: "forwards" }}
           >
             An offline-first, encrypted messaging network that works when the
             internet doesn't.
           </p>
 
           <div
-            className="mt-12 flex items-center justify-center gap-4 opacity-0 animate-fade-in relative z-30"
+            className="mt-12 flex items-center justify-center gap-4 opacity-0 animate-fade-in relative z-[100]"
             style={{ animationDelay: "1.5s", animationFillMode: "forwards" }}
           >
             <Button
               variant="outline"
               size="lg"
-              onClick={() => {
-                const aboutSection = document.getElementById("about");
-                if (aboutSection) {
-                  aboutSection.scrollIntoView({
-                    behavior: "smooth",
-                    block: "start",
-                  });
-                }
-              }}
-              className="rounded-full px-8 py-6 text-base border-foreground/20 hover:bg-foreground hover:text-background transition-all duration-300 group cursor-pointer"
+              onClick={handleScrollToAbout}
+              className="rounded-full px-8 py-6 text-base border-foreground/20 hover:bg-foreground hover:text-background transition-all duration-300 group cursor-pointer relative z-[100]"
             >
               <span className="mr-2 inline-block w-2 h-2 rounded-full bg-accent group-hover:bg-background transition-colors" />
               About Us
@@ -166,7 +175,8 @@ const Hero = () => {
           willChange: 'transform, opacity',
           transform: 'translate3d(-50%, 0, 0)',
           backfaceVisibility: 'hidden',
-          animationDelay: "2s" 
+          animationDelay: "2s",
+          animationFillMode: "forwards"
         }}
       >
         <div className="flex flex-col items-center gap-2 text-muted-foreground">
