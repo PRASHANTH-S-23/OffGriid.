@@ -134,19 +134,22 @@ const Hero = () => {
           </p>
 
           <div
-            className="mt-12 flex items-center justify-center gap-4 opacity-0 animate-fade-in"
-            style={{ animationDelay: "1.5s" }}
+            className="mt-12 flex items-center justify-center gap-4 opacity-0 animate-fade-in relative z-30"
+            style={{ animationDelay: "1.5s", animationFillMode: "forwards" }}
           >
             <Button
               variant="outline"
               size="lg"
-              onClick={() =>
-                document.getElementById("about")?.scrollIntoView({
-                  behavior: "smooth",
-                  block: "start",
-                })
-              }
-              className="rounded-full px-8 py-6 text-base border-foreground/20 hover:bg-foreground hover:text-background transition-all duration-300 group"
+              onClick={() => {
+                const aboutSection = document.getElementById("about");
+                if (aboutSection) {
+                  aboutSection.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start",
+                  });
+                }
+              }}
+              className="rounded-full px-8 py-6 text-base border-foreground/20 hover:bg-foreground hover:text-background transition-all duration-300 group cursor-pointer"
             >
               <span className="mr-2 inline-block w-2 h-2 rounded-full bg-accent group-hover:bg-background transition-colors" />
               About Us
