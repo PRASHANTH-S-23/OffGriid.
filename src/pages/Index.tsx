@@ -37,12 +37,13 @@ const Index = ({ stage }: { stage: number }) => {
       {showLiquid && (
         <Suspense fallback={null}>
           <div 
-            className="fixed inset-0 z-0 h-[200vh] pointer-events-none"
+            className="fixed inset-0 z-0 h-[200vh]"
             style={{ 
               willChange: 'transform',
               transform: 'translate3d(0, 0, 0)',
               backfaceVisibility: 'hidden',
-              contain: 'strict'
+              contain: 'strict',
+              pointerEvents: 'none'
             }}
           >
             <LiquidEther
