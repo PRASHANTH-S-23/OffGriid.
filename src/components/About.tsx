@@ -42,7 +42,7 @@ const About = () => {
   return (
     <section
       ref={sectionRef}
-      id="about"
+      id="about-section"
       className="relative pt-16 md:pt-24 pb-32 md:pb-48 overflow-hidden content-auto gpu-layer"
     >
       <div className="absolute inset-0 z-0 bg-background/80 backdrop-blur-[2px]" />
