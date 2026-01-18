@@ -28,6 +28,9 @@ const Index = ({ stage }: { stage: number }) => {
         <Hero />
       </Suspense>
 
+      {/* Anchor for smooth scrolling (exists immediately, even before About mounts) */}
+      <div id="about" aria-hidden="true" className="relative z-10 h-px w-px" />
+
       {/* STAGE 1: Navigation (after first paint) */}
       {stage >= 1 && (
         <Navigation onContactClick={() => setIsContactOpen(true)} />

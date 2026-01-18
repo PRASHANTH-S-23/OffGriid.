@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo, useCallback } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import SplitText from "./SplitText";
 import CurveDecoration from "./CurveDecoration";
 import { Button } from "@/components/ui/button";
