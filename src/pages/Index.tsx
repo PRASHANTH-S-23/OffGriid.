@@ -38,16 +38,21 @@ const Index = ({ stage }: { stage: number }) => {
         <Suspense fallback={null}>
           <div 
             className="fixed inset-0 z-0 h-[200vh] pointer-events-none"
-            style={{ willChange: 'transform' }} // GPU acceleration hint
+            style={{ 
+              willChange: 'transform',
+              transform: 'translate3d(0, 0, 0)',
+              backfaceVisibility: 'hidden',
+              contain: 'strict'
+            }}
           >
             <LiquidEther
               colors={["#00FF66", "#00CC55", "#0E1F17"]}
               mouseForce={12} 
               cursorSize={100} 
-              resolution={0.25} 
+              resolution={0.2} 
               autoDemo={true}
-              autoSpeed={0.25} 
-              autoIntensity={1.5} 
+              autoSpeed={0.2} 
+              autoIntensity={1.2} 
             />
           </div>
         </Suspense>

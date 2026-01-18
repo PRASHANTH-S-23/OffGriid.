@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useMemo, useCallback } from "react";
 import SplitText from "./SplitText";
 import CurveDecoration from "./CurveDecoration";
 import { Button } from "@/components/ui/button";
@@ -9,22 +9,46 @@ const Hero = () => {
   const contentRef = useRef<HTMLDivElement>(null);
   const curveRef = useRef<HTMLDivElement>(null);
   const scrollIndicatorRef = useRef<HTMLDivElement>(null);
-  const [scrollProgress, setScrollProgress] = useState(0);
+  const scrollProgressRef = useRef(0);
+  const rafIdRef = useRef<number | null>(null);
+
+  // Memoized scroll handler with RAF batching
+  const updateScrollTransforms = useCallback(() => {
+    const progress = scrollProgressRef.current;
+    
+    // Apply transforms directly to DOM for smoother performance
+    if (contentRef.current) {
+      contentRef.current.style.transform = `translate3d(0, ${progress * -150}px, 0)`;
+      contentRef.current.style.opacity = String(Math.max(0, 1 - progress * 1.5));
+    }
+    
+    if (curveRef.current) {
+      curveRef.current.style.transform = `translate3d(0, ${progress * -80}px, 0) scale(${1 + progress * 0.1})`;
+    }
+    
+    if (scrollIndicatorRef.current) {
+      scrollIndicatorRef.current.style.transform = `translate3d(-50%, ${progress * -30}px, 0)`;
+      scrollIndicatorRef.current.style.opacity = String(Math.max(0, 1 - progress * 5));
+    }
+  }, []);
 
   useEffect(() => {
     let ticking = false;
 
     const handleScroll = () => {
       if (!ticking) {
-        requestAnimationFrame(() => {
-          if (!sectionRef.current) return;
+        rafIdRef.current = requestAnimationFrame(() => {
+          if (!sectionRef.current) {
+            ticking = false;
+            return;
+          }
           
           const rect = sectionRef.current.getBoundingClientRect();
           const viewportHeight = window.innerHeight;
           
           // Calculate scroll progress (0 to 1)
-          const progress = Math.max(0, Math.min(1, 1 - (rect.bottom / viewportHeight)));
-          setScrollProgress(progress);
+          scrollProgressRef.current = Math.max(0, Math.min(1, 1 - (rect.bottom / viewportHeight)));
+          updateScrollTransforms();
           
           ticking = false;
         });
@@ -36,34 +60,26 @@ const Hero = () => {
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll(); // Initial call
 
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  // Calculate transform values based on scroll
-  const contentTransform = {
-    transform: `translateY(${scrollProgress * -150}px)`,
-    opacity: 1 - scrollProgress * 1.5,
-  };
-
-  const curveTransform = {
-    transform: `translateY(${scrollProgress * -80}px) scale(${1 + scrollProgress * 0.1})`,
-  };
-
-  const indicatorTransform = {
-    transform: `translateY(${scrollProgress * -30}px)`,
-    opacity: Math.max(0, 1 - scrollProgress * 5),
-  };
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
+    };
+  }, [updateScrollTransforms]);
 
   return (
     <section
       ref={sectionRef}
-      className="relative min-h-screen flex items-center justify-center overflow-hidden"
+      className="relative min-h-screen flex items-center justify-center overflow-hidden gpu-layer"
     >
       {/* Curve decoration */}
       <div
         ref={curveRef}
-        className="absolute bottom-0 left-0 right-0 z-10 translate-y-1/2 will-change-transform"
-        style={curveTransform}
+        className="absolute bottom-0 left-0 right-0 z-10 translate-y-1/2"
+        style={{ 
+          willChange: 'transform',
+          transform: 'translate3d(0, 0, 0)',
+          backfaceVisibility: 'hidden'
+        }}
       >
         <CurveDecoration />
       </div>
@@ -74,8 +90,12 @@ const Hero = () => {
       {/* Hero content */}
       <div
         ref={contentRef}
-        className="relative z-20 container mx-auto px-6 md:px-12 text-center will-change-transform"
-        style={contentTransform}
+        className="relative z-20 container mx-auto px-6 md:px-12 text-center"
+        style={{ 
+          willChange: 'transform, opacity',
+          transform: 'translate3d(0, 0, 0)',
+          backfaceVisibility: 'hidden'
+        }}
       >
         <div className="max-w-5xl mx-auto">
           <h1
@@ -138,8 +158,13 @@ const Hero = () => {
       {/* Scroll indicator */}
       <div
         ref={scrollIndicatorRef}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 opacity-0 animate-fade-in will-change-transform"
-        style={{ ...indicatorTransform, animationDelay: "2s" }}
+        className="absolute bottom-8 left-1/2 z-20 opacity-0 animate-fade-in"
+        style={{ 
+          willChange: 'transform, opacity',
+          transform: 'translate3d(-50%, 0, 0)',
+          backfaceVisibility: 'hidden',
+          animationDelay: "2s" 
+        }}
       >
         <div className="flex flex-col items-center gap-2 text-muted-foreground">
           <span className="text-sm">Scroll</span>
