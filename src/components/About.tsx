@@ -43,7 +43,7 @@ const About = () => {
     <section
       ref={sectionRef}
       id="about"
-      className="relative pt-16 md:pt-24 pb-32 md:pb-48 overflow-hidden"
+      className="relative pt-16 md:pt-24 pb-32 md:pb-48 overflow-hidden content-auto gpu-layer"
     >
       <div className="absolute inset-0 z-0 bg-background/80 backdrop-blur-[2px]" />
 
@@ -63,18 +63,25 @@ const About = () => {
               ref={imageRef}
               className={`
                 relative w-full aspect-[4/5] rounded-2xl overflow-hidden border border-border
-                transition-all duration-1000 ease-out
+                smooth-transition
                 ${imageVisible 
                   ? 'opacity-100 translate-y-0 scale-100' 
                   : 'opacity-0 translate-y-12 scale-95'
                 }
               `}
+              style={{
+                willChange: imageVisible ? 'auto' : 'transform, opacity',
+                transitionDuration: '1000ms',
+                transitionProperty: 'transform, opacity',
+                backfaceVisibility: 'hidden'
+              }}
             >
               <img
                 src="/mesh.webp"
                 alt="OffGriid mesh network visualization"
                 className="w-full h-full object-cover scale-110"
                 loading="lazy"
+                decoding="async"
               />
             </div>
           </div>
@@ -85,12 +92,17 @@ const About = () => {
               ref={textRef}
               className={`
                 text-2xl md:text-3xl lg:text-4xl font-light leading-relaxed text-foreground text-justify
-                transition-all duration-1000 ease-out
+                smooth-transition
                 ${textVisible 
                   ? 'opacity-100 translate-y-0' 
                   : 'opacity-0 translate-y-12'
                 }
               `}
+              style={{
+                willChange: textVisible ? 'auto' : 'transform, opacity',
+                transitionDuration: '1000ms',
+                transitionProperty: 'transform, opacity'
+              }}
             >
               OffGriid is an offline-first, peer-to-peer messaging network built
               for moments when traditional communication infrastructure fails.

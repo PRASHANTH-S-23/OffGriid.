@@ -121,10 +121,35 @@
 
   body {
     @apply bg-background text-foreground antialiased;
+    /* Performance: Enable GPU compositing */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 
   html {
+    /* Performance: Use CSS custom scroll-behavior with JS fallback */
     scroll-behavior: smooth;
+    /* Prevent layout shifts */
+    overflow-x: hidden;
+  }
+
+  /* Performance: GPU acceleration for animated elements */
+  .will-change-transform {
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+
+  .will-change-opacity {
+    will-change: opacity;
+  }
+
+  /* Performance: Reduce paint on scroll */
+  .gpu-layer {
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    perspective: 1000px;
   }
 }
 
@@ -135,6 +160,9 @@
     width: 100%;
     height: 100%;
     pointer-events: auto;
+    /* Performance: Isolate compositing */
+    contain: strict;
+    isolation: isolate;
   }
 
   .split-parent {
@@ -145,11 +173,25 @@
   .split-word,
   .split-line {
     display: inline-block;
+    /* Performance: GPU acceleration for split text animations */
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+  }
+
+  /* Performance: Optimized transitions */
+  .smooth-transition {
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
   }
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  /* Performance: Content visibility for below-fold content */
+  .content-auto {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 500px;
   }
 }
