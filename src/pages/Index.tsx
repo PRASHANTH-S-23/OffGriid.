@@ -1,5 +1,5 @@
 import { useEffect, useState, lazy, Suspense } from "react";
-import Navigation from "@/components/Navigation";
+import StaggeredMenu from "@/components/StaggeredMenu";
 
 // Lazy-loaded components
 const Hero = lazy(() => import("@/components/Hero"));
@@ -7,6 +7,17 @@ const About = lazy(() => import("@/components/About"));
 const Footer = lazy(() => import("@/components/Footer"));
 const ContactModal = lazy(() => import("@/components/ContactModal"));
 const LiquidEther = lazy(() => import("@/components/LiquidEther"));
+
+const menuItems = [
+  { label: 'Home', ariaLabel: 'Go to home', link: '#' },
+  { label: 'About Us', ariaLabel: 'Go to about section', link: '#about' },
+  { label: 'Docs', ariaLabel: 'View documentation', link: 'https://github.com/PRASHANTH-S-23/OffGriid./blob/main/README.md' },
+  { label: 'Contact', ariaLabel: 'Go to contact section', link: '#footer' },
+];
+
+const socialItems = [
+  { label: 'ZERO BLINK', link: 'https://zeroblink.vercel.app/' },
+];
 
 const Index = ({ stage }: { stage: number }) => {
   const [isContactOpen, setIsContactOpen] = useState(false);
@@ -30,7 +41,12 @@ const Index = ({ stage }: { stage: number }) => {
 
       {/* STAGE 1: Navigation (after first paint) */}
       {stage >= 1 && (
-        <Navigation onContactClick={() => setIsContactOpen(true)} />
+        <StaggeredMenu
+          items={menuItems}
+          socialItems={socialItems}
+          colors={['hsl(142, 100%, 25%)', 'hsl(142, 100%, 35%)']}
+          onContactClick={() => setIsContactOpen(true)}
+        />
       )}
 
       {/* STAGE 2+: Background effect (DELAYED - most expensive) */}
