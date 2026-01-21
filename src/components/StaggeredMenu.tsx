@@ -1,4 +1,4 @@
-import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
+import React, { useCallback, useLayoutEffect, useRef, useState, useEffect } from 'react';
 import { gsap } from 'gsap';
 
 export interface StaggeredMenuItem {
@@ -50,8 +50,42 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
   onMenuClose,
   onContactClick
 }: StaggeredMenuProps) => {
+  const [activeSection, setActiveSection] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const openRef = useRef(false);
+
+  // Scrollspy: track active section based on scroll position
+  useEffect(() => {
+    const anchors = items
+      .filter((item) => item.link.startsWith('#'))
+      .map((item) => item.link);
+
+    if (anchors.length === 0) return;
+
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      const offset = 150; // offset for fixed header
+
+      let current: string | null = null;
+
+      for (const anchor of anchors) {
+        const el = document.querySelector(anchor);
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          const top = rect.top + window.scrollY - offset;
+          if (scrollY >= top) {
+            current = anchor;
+          }
+        }
+      }
+
+      setActiveSection(current);
+    };
+
+    handleScroll(); // initial check
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [items]);
 
   const panelRef = useRef<HTMLDivElement>(null);
   const preLayersRef = useRef<HTMLDivElement>(null);
@@ -553,31 +587,41 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
               data-numbering={displayItemNumbering || undefined}
             >
               {items && items.length ? (
-                items.map((it, idx) => (
-                  <div
-                    key={idx}
-                    className="sm-panel-item group"
-                    style={{ ['--sm-num-opacity' as string]: 0 }}
-                  >
-                    <button
-                      onClick={() => handleItemClick(it.link)}
-                      aria-label={it.ariaLabel}
-                      className="sm-panel-itemLabel-wrap overflow-hidden block w-full text-left"
+                items.map((it, idx) => {
+                  const isActive = it.link.startsWith('#') && activeSection === it.link;
+                  return (
+                    <div
+                      key={idx}
+                      className="sm-panel-item group"
+                      style={{ ['--sm-num-opacity' as string]: 0 }}
                     >
-                      <span className="sm-panel-itemLabel flex items-center gap-4 text-4xl md:text-5xl font-light text-foreground hover:text-primary transition-colors duration-300 py-2">
-                        {displayItemNumbering && (
-                          <span
-                            className="text-sm text-muted-foreground transition-opacity"
-                            style={{ opacity: 'var(--sm-num-opacity)' }}
-                          >
-                            {String(idx + 1).padStart(2, '0')}
-                          </span>
-                        )}
-                        {it.label}
-                      </span>
-                    </button>
-                  </div>
-                ))
+                      <button
+                        onClick={() => handleItemClick(it.link)}
+                        aria-label={it.ariaLabel}
+                        className="sm-panel-itemLabel-wrap overflow-hidden block w-full text-left"
+                      >
+                        <span
+                          className={`sm-panel-itemLabel flex items-center gap-4 text-4xl md:text-5xl font-light transition-colors duration-300 py-2 ${
+                            isActive ? 'text-primary' : 'text-foreground hover:text-primary'
+                          }`}
+                        >
+                          {displayItemNumbering && (
+                            <span
+                              className={`text-sm transition-opacity ${isActive ? 'text-primary' : 'text-muted-foreground'}`}
+                              style={{ opacity: 'var(--sm-num-opacity)' }}
+                            >
+                              {String(idx + 1).padStart(2, '0')}
+                            </span>
+                          )}
+                          {it.label}
+                          {isActive && (
+                            <span className="w-2 h-2 rounded-full bg-primary ml-2 animate-pulse" />
+                          )}
+                        </span>
+                      </button>
+                    </div>
+                  );
+                })
               ) : (
                 <div className="sm-panel-item">
                   <div className="sm-panel-itemLabel-wrap overflow-hidden">
