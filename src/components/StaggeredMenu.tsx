@@ -498,7 +498,7 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
             >
               <span
                 ref={textWrapRef}
-                className="sm-text-wrap overflow-hidden h-5 relative"
+                className="sm-text-wrap inline-block overflow-hidden h-5 relative"
                 style={{ width: '3rem' }}
               >
                 <span
