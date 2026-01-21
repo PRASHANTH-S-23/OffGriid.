@@ -593,17 +593,17 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
                       <button
                         onClick={() => handleItemClick(it.link)}
                         aria-label={it.ariaLabel}
-                        className="sm-panel-itemLabel-wrap overflow-hidden block w-full text-left rounded-lg px-3 py-1 -mx-3 transition-colors duration-300 hover:bg-[hsl(142,50%,15%)]"
+                        className="sm-panel-itemLabel-wrap overflow-hidden block w-full text-left"
                       >
                         <span
                           className={`sm-panel-itemLabel flex items-center gap-4 text-4xl md:text-5xl font-light transition-colors duration-300 py-2 ${
-                            isActive ? 'text-primary' : 'text-foreground group-hover:text-primary'
+                            isActive ? 'text-primary' : 'text-foreground hover:text-[hsl(142,50%,25%)]'
                           }`}
                         >
                           {displayItemNumbering && (
                             <span
-                              className={`sm-item-number text-sm transition-opacity ${
-                                isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-primary'
+                              className={`sm-item-number text-sm transition-colors duration-300 ${
+                                isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-[hsl(142,50%,25%)]'
                               }`}
                             >
                               {String(idx + 1).padStart(2, '0')}
@@ -642,7 +642,7 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
                       href={s.link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="sm-socials-link text-foreground hover:text-primary hover:bg-[hsl(142,50%,15%)] px-3 py-1.5 rounded-md transition-colors duration-300 text-sm font-medium"
+                      className="sm-socials-link text-foreground hover:text-[hsl(142,50%,25%)] transition-colors duration-300 text-sm font-medium"
                     >
                       {s.label}
                     </a>
