@@ -110,8 +110,8 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
 
   const buildOpenTimeline = useCallback(() => {
     const panel = panelRef.current;
-    const layers = preLayerElsRef.current;
-    if (!panel) return null;
+    const layers = preLayerElsRef.current || [];
+    if (!panel || !Array.isArray(layers)) return null;
 
     openTlRef.current?.kill();
     if (closeTweenRef.current) {
@@ -127,7 +127,8 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
     const socialTitle = panel.querySelector('.sm-socials-title') as HTMLElement | null;
     const socialLinks = Array.from(panel.querySelectorAll('.sm-socials-link')) as HTMLElement[];
 
-    const layerStates = layers.map(el => ({ el, start: Number(gsap.getProperty(el, 'xPercent')) }));
+    const validLayers = layers.filter(el => el !== null && el !== undefined);
+    const layerStates = validLayers.map(el => ({ el, start: Number(gsap.getProperty(el, 'xPercent')) }));
     const panelStart = Number(gsap.getProperty(panel, 'xPercent'));
 
     if (itemEls.length) gsap.set(itemEls, { yPercent: 140, rotate: 10 });
@@ -217,10 +218,11 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
     itemEntranceTweenRef.current?.kill();
 
     const panel = panelRef.current;
-    const layers = preLayerElsRef.current;
+    const layers = preLayerElsRef.current || [];
     if (!panel) return;
 
-    const all: HTMLElement[] = [...layers, panel];
+    const validLayers = layers.filter(el => el !== null && el !== undefined);
+    const all: HTMLElement[] = [...validLayers, panel];
     closeTweenRef.current?.kill();
 
     const offscreen = position === 'left' ? -100 : 100;
