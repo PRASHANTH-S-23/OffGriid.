@@ -9,7 +9,7 @@ const ContactModal = lazy(() => import("@/components/ContactModal"));
 const LiquidEther = lazy(() => import("@/components/LiquidEther"));
 
 const menuItems = [
-  { label: 'Home', ariaLabel: 'Go to home', link: '#' },
+  { label: 'Home', ariaLabel: 'Go to home', link: '#hero' },
   { label: 'About Us', ariaLabel: 'Go to about section', link: '#about' },
   { label: 'Docs', ariaLabel: 'View documentation', link: 'https://github.com/PRASHANTH-S-23/OffGriid./blob/main/README.md' },
   { label: 'Contact', ariaLabel: 'Go to contact section', link: '#footer' },
