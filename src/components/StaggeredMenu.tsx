@@ -56,8 +56,9 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
 
   // Scrollspy: track active section based on scroll position
   useEffect(() => {
+    // Filter to valid anchors (must be "#something", not just "#")
     const anchors = items
-      .filter((item) => item.link.startsWith('#'))
+      .filter((item) => item.link.startsWith('#') && item.link.length > 1)
       .map((item) => item.link);
 
     if (anchors.length === 0) return;
@@ -69,13 +70,17 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
       let current: string | null = null;
 
       for (const anchor of anchors) {
-        const el = document.querySelector(anchor);
-        if (el) {
-          const rect = el.getBoundingClientRect();
-          const top = rect.top + window.scrollY - offset;
-          if (scrollY >= top) {
-            current = anchor;
+        try {
+          const el = document.querySelector(anchor);
+          if (el) {
+            const rect = el.getBoundingClientRect();
+            const top = rect.top + window.scrollY - offset;
+            if (scrollY >= top) {
+              current = anchor;
+            }
           }
+        } catch {
+          // Invalid selector, skip
         }
       }
 
