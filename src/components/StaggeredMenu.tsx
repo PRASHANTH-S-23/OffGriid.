@@ -76,6 +76,19 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
 
   const itemEntranceTweenRef = useRef<gsap.core.Tween | null>(null);
 
+  const resolveGsapColor = useCallback((el: HTMLElement, color: string) => {
+    // GSAP can't reliably parse CSS variable color strings like `hsl(var(--foreground))`.
+    // We resolve them to a computed rgb(...) string for animation targets.
+    if (!color || typeof color !== 'string') return '';
+    if (!color.includes('var(')) return color;
+
+    const prev = (el as HTMLElement).style.color;
+    (el as HTMLElement).style.color = color;
+    const resolved = getComputedStyle(el).color;
+    (el as HTMLElement).style.color = prev;
+    return resolved;
+  }, []);
+
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
       const panel = panelRef.current;
@@ -103,7 +116,8 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
 
       gsap.set(textInner, { yPercent: 0 });
 
-      if (toggleBtnRef.current) gsap.set(toggleBtnRef.current, { color: menuButtonColor });
+      // Don't use GSAP for setting color when it might be CSS-variable based.
+      if (toggleBtnRef.current) toggleBtnRef.current.style.color = menuButtonColor;
     });
     return () => ctx.revert();
   }, [menuButtonColor, position]);
@@ -280,22 +294,39 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
       if (!btn) return;
       colorTweenRef.current?.kill();
       if (changeMenuColorOnOpen) {
-        const targetColor = opening ? openMenuButtonColor : menuButtonColor;
-        colorTweenRef.current = gsap.to(btn, { color: targetColor, delay: 0.18, duration: 0.3, ease: 'power2.out' });
+        const targetRaw = opening ? openMenuButtonColor : menuButtonColor;
+        const targetResolved = resolveGsapColor(btn, targetRaw);
+
+        // If we couldn't resolve (unexpected), fall back to immediate style set.
+        if (!targetResolved) {
+          btn.style.color = targetRaw;
+          return;
+        }
+
+        colorTweenRef.current = gsap.to(btn, {
+          color: targetResolved,
+          delay: 0.18,
+          duration: 0.3,
+          ease: 'power2.out',
+          onComplete: () => {
+            // Preserve theming by re-applying the CSS-variable based string.
+            btn.style.color = targetRaw;
+          }
+        });
       } else {
-        gsap.set(btn, { color: menuButtonColor });
+        btn.style.color = menuButtonColor;
       }
     },
-    [openMenuButtonColor, menuButtonColor, changeMenuColorOnOpen]
+    [openMenuButtonColor, menuButtonColor, changeMenuColorOnOpen, resolveGsapColor]
   );
 
   React.useEffect(() => {
     if (toggleBtnRef.current) {
       if (changeMenuColorOnOpen) {
         const targetColor = openRef.current ? openMenuButtonColor : menuButtonColor;
-        gsap.set(toggleBtnRef.current, { color: targetColor });
+        toggleBtnRef.current.style.color = targetColor;
       } else {
-        gsap.set(toggleBtnRef.current, { color: menuButtonColor });
+        toggleBtnRef.current.style.color = menuButtonColor;
       }
     }
   }, [changeMenuColorOnOpen, menuButtonColor, openMenuButtonColor]);
