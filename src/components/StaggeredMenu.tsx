@@ -110,19 +110,6 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
 
   const itemEntranceTweenRef = useRef<gsap.core.Tween | null>(null);
 
-  const resolveGsapColor = useCallback((el: HTMLElement, color: string) => {
-    // GSAP can't reliably parse CSS variable color strings like `hsl(var(--foreground))`.
-    // We resolve them to a computed rgb(...) string for animation targets.
-    if (!color || typeof color !== 'string') return '';
-    if (!color.includes('var(')) return color;
-
-    const prev = (el as HTMLElement).style.color;
-    (el as HTMLElement).style.color = color;
-    const resolved = getComputedStyle(el).color;
-    (el as HTMLElement).style.color = prev;
-    return resolved;
-  }, []);
-
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
       const panel = panelRef.current;
@@ -170,7 +157,7 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
 
     const itemEls = Array.from(panel.querySelectorAll('.sm-panel-itemLabel')) as HTMLElement[];
     const numberEls = Array.from(
-      panel.querySelectorAll('.sm-panel-list[data-numbering] .sm-panel-item')
+      panel.querySelectorAll('.sm-panel-list[data-numbering] .sm-item-number')
     ) as HTMLElement[];
     const socialTitle = panel.querySelector('.sm-socials-title') as HTMLElement | null;
     const socialLinks = Array.from(panel.querySelectorAll('.sm-socials-link')) as HTMLElement[];
@@ -180,7 +167,8 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
     const panelStart = Number(gsap.getProperty(panel, 'xPercent'));
 
     if (itemEls.length) gsap.set(itemEls, { yPercent: 140, rotate: 10 });
-    if (numberEls.length) gsap.set(numberEls, { ['--sm-num-opacity' as string]: 0 });
+    // Avoid animating CSS custom props via GSAP (can trigger GSAP color parsing bug on some values)
+    if (numberEls.length) gsap.set(numberEls, { opacity: 0 });
     if (socialTitle) gsap.set(socialTitle, { opacity: 0 });
     if (socialLinks.length) gsap.set(socialLinks, { y: 25, opacity: 0 });
 
@@ -214,7 +202,7 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
       if (numberEls.length) {
         tl.to(
           numberEls,
-          { duration: 0.6, ease: 'power2.out', ['--sm-num-opacity' as string]: 1, stagger: { each: 0.08, from: 'start' } },
+          { duration: 0.6, ease: 'power2.out', opacity: 1, stagger: { each: 0.08, from: 'start' } },
           itemsStart + 0.1
         );
       }
@@ -249,14 +237,25 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
   const playOpen = useCallback(() => {
     if (busyRef.current) return;
     busyRef.current = true;
-    const tl = buildOpenTimeline();
-    if (tl) {
-      tl.eventCallback('onComplete', () => {
+    try {
+      const tl = buildOpenTimeline();
+      if (tl) {
+        tl.eventCallback('onComplete', () => {
+          busyRef.current = false;
+        });
+        tl.play(0);
+      } else {
         busyRef.current = false;
-      });
-      tl.play(0);
-    } else {
+      }
+    } catch (e) {
+      console.error('[StaggeredMenu] GSAP open animation failed; falling back to static open.', e);
       busyRef.current = false;
+      const panel = panelRef.current;
+      const layers = preLayerElsRef.current || [];
+      const all: HTMLElement[] = [...layers.filter(Boolean), ...(panel ? [panel] : [])];
+      all.forEach((el) => {
+        el.style.transform = 'translateX(0)';
+      });
     }
   }, [buildOpenTimeline]);
 
@@ -275,28 +274,37 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
 
     const offscreen = position === 'left' ? -100 : 100;
 
-    closeTweenRef.current = gsap.to(all, {
-      xPercent: offscreen,
-      duration: 0.32,
-      ease: 'power3.in',
-      overwrite: 'auto',
-      onComplete: () => {
-        const itemEls = Array.from(panel.querySelectorAll('.sm-panel-itemLabel')) as HTMLElement[];
-        if (itemEls.length) gsap.set(itemEls, { yPercent: 140, rotate: 10 });
+    try {
+      closeTweenRef.current = gsap.to(all, {
+        xPercent: offscreen,
+        duration: 0.32,
+        ease: 'power3.in',
+        overwrite: 'auto',
+        onComplete: () => {
+          const itemEls = Array.from(panel.querySelectorAll('.sm-panel-itemLabel')) as HTMLElement[];
+          if (itemEls.length) gsap.set(itemEls, { yPercent: 140, rotate: 10 });
 
-        const numberEls = Array.from(
-          panel.querySelectorAll('.sm-panel-list[data-numbering] .sm-panel-item')
-        ) as HTMLElement[];
-        if (numberEls.length) gsap.set(numberEls, { ['--sm-num-opacity' as string]: 0 });
+          const numberEls = Array.from(
+            panel.querySelectorAll('.sm-panel-list[data-numbering] .sm-item-number')
+          ) as HTMLElement[];
+          if (numberEls.length) gsap.set(numberEls, { opacity: 0 });
 
-        const socialTitle = panel.querySelector('.sm-socials-title') as HTMLElement | null;
-        const socialLinks = Array.from(panel.querySelectorAll('.sm-socials-link')) as HTMLElement[];
-        if (socialTitle) gsap.set(socialTitle, { opacity: 0 });
-        if (socialLinks.length) gsap.set(socialLinks, { y: 25, opacity: 0 });
+          const socialTitle = panel.querySelector('.sm-socials-title') as HTMLElement | null;
+          const socialLinks = Array.from(panel.querySelectorAll('.sm-socials-link')) as HTMLElement[];
+          if (socialTitle) gsap.set(socialTitle, { opacity: 0 });
+          if (socialLinks.length) gsap.set(socialLinks, { y: 25, opacity: 0 });
 
-        busyRef.current = false;
-      }
-    });
+          busyRef.current = false;
+        }
+      });
+    } catch (e) {
+      console.error('[StaggeredMenu] GSAP close animation failed; falling back to static close.', e);
+      const dir = position === 'left' ? '-100%' : '100%';
+      all.forEach((el) => {
+        el.style.transform = `translateX(${dir})`;
+      });
+      busyRef.current = false;
+    }
   }, [position]);
 
   const animateIcon = useCallback((opening: boolean) => {
@@ -326,32 +334,15 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
     (opening: boolean) => {
       const btn = toggleBtnRef.current;
       if (!btn) return;
+
+      // IMPORTANT: Avoid GSAP color tweening here because GSAP can crash when parsing
+      // CSS variable-based color strings in some environments.
+      // The button already has Tailwind `transition-colors`, so a style swap animates smoothly.
       colorTweenRef.current?.kill();
-      if (changeMenuColorOnOpen) {
-        const targetRaw = opening ? openMenuButtonColor : menuButtonColor;
-        const targetResolved = resolveGsapColor(btn, targetRaw);
-
-        // If we couldn't resolve (unexpected), fall back to immediate style set.
-        if (!targetResolved) {
-          btn.style.color = targetRaw;
-          return;
-        }
-
-        colorTweenRef.current = gsap.to(btn, {
-          color: targetResolved,
-          delay: 0.18,
-          duration: 0.3,
-          ease: 'power2.out',
-          onComplete: () => {
-            // Preserve theming by re-applying the CSS-variable based string.
-            btn.style.color = targetRaw;
-          }
-        });
-      } else {
-        btn.style.color = menuButtonColor;
-      }
+      if (changeMenuColorOnOpen) btn.style.color = opening ? openMenuButtonColor : menuButtonColor;
+      else btn.style.color = menuButtonColor;
     },
-    [openMenuButtonColor, menuButtonColor, changeMenuColorOnOpen, resolveGsapColor]
+    [openMenuButtonColor, menuButtonColor, changeMenuColorOnOpen]
   );
 
   React.useEffect(() => {
@@ -593,7 +584,6 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
                     <div
                       key={idx}
                       className="sm-panel-item group"
-                      style={{ ['--sm-num-opacity' as string]: 0 }}
                     >
                       <button
                         onClick={() => handleItemClick(it.link)}
@@ -607,8 +597,9 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
                         >
                           {displayItemNumbering && (
                             <span
-                              className={`text-sm transition-opacity ${isActive ? 'text-primary' : 'text-muted-foreground'}`}
-                              style={{ opacity: 'var(--sm-num-opacity)' }}
+                              className={`sm-item-number text-sm transition-opacity ${
+                                isActive ? 'text-primary' : 'text-muted-foreground'
+                              }`}
                             >
                               {String(idx + 1).padStart(2, '0')}
                             </span>
